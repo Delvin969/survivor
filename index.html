@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>⚡ SURVIVOR ULTRA - No Trail & Fix Slow</title>
+    <title>⚡ SURVIVOR ULTRA - Bencana Alam HD</title>
     <style>
         :root {
             --bg: #0a0a12;
@@ -12,6 +12,11 @@
             --gold: #ffd700;
             --card-bg: rgba(18, 18, 35, 0.95);
             --card-border: rgba(0, 240, 255, 0.4);
+            --water: #00aaff;
+            --earth: #b8860b;
+            --ice: #add8e6;
+            --nature: #228b22;
+            --lightning: #ffff00;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -41,8 +46,8 @@
         #xp-bar-bg { background:rgba(0,0,0,0.6); border-radius:12px; height:12px; overflow:hidden; border:1px solid rgba(0,240,255,0.3); backdrop-filter:blur(8px); position:relative; }
         #xp-bar-fill { height:100%; background:linear-gradient(90deg,#00c8ff,#00f0ff,#00c8ff); border-radius:12px; transition:width 0.2s; box-shadow:0 0 12px rgba(0,240,255,0.8); }
         #xp-text { text-align:center; font-size:11px; font-weight:700; color:#fff; margin-top:2px; letter-spacing:1px; text-shadow:0 0 6px rgba(0,240,255,0.7); }
-        #disaster-alert { position:absolute; top:100px; left:50%; transform:translateX(-50%); font-size:22px; font-weight:900; letter-spacing:3px; pointer-events:none; text-shadow:0 0 20px currentColor; animation:disasterPulse 0.5s infinite; display:none; }
-        @keyframes disasterPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        #disaster-alert { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:36px; font-weight:900; letter-spacing:4px; pointer-events:none; text-shadow:0 0 30px currentColor; display:none; background:rgba(0,0,0,0.8); border:3px solid currentColor; border-radius:20px; padding:20px 40px; backdrop-filter:blur(10px); box-shadow:0 0 60px currentColor; }
+        #disaster-flash { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; background:rgba(255,255,255,0); transition:background 0.3s; z-index:5; }
         #boss-bar-container { position:absolute; top:76px; left:50%; transform:translateX(-50%); width:min(400px,60vw); pointer-events:none; display:none; }
         #boss-bar-bg { background:rgba(0,0,0,0.8); border-radius:16px; height:12px; overflow:hidden; border:2px solid var(--gold); }
         #boss-bar-fill { height:100%; background:linear-gradient(90deg,#ff6600,#ffd700,#ff6600); border-radius:14px; transition:width 0.2s; box-shadow:0 0 16px rgba(255,215,0,0.9); }
@@ -98,6 +103,7 @@
 <body>
     <div id="game-wrapper">
         <canvas id="gameCanvas"></canvas>
+        <div id="disaster-flash"></div>
         <div id="ui-overlay">
             <div id="top-bar">
                 <div id="level-badge"><span>LVL</span><div id="level-num">1</div></div>
@@ -112,7 +118,7 @@
         </div>
         <div id="upgrade-overlay"><div id="upgrade-panel"></div></div>
         <div id="game-over-overlay"><div id="game-over-panel"><h1>GAME OVER</h1><div class="stats">⏱️ Bertahan: <span id="go-time">00:00</span><br>💀 Membunuh: <span id="go-kills">0</span><br>⭐ Level: <span id="go-level">1</span><br>👑 Bos: <span id="go-bosses">0</span></div><button id="restart-btn" onclick="restartGame()">MAIN LAGI</button></div></div>
-        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">⚡ NO TRAIL & FIX SLOW ⚡</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 XP berbeda per musuh • ⚡ Bos tiap 45 detik • 🌊 Tsunami<br>🤖 Drone • ✈️ Pesawat • 💣 Bom • 🔪 Pisau Besar</div></div></div>
+        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">⚡ BENCANA ALAM HD ⚡</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 XP berbeda per musuh • ⚡ Bos tiap 45 detik • 🌊 Tsunami</div></div></div>
     </div>
     <script>
     (function(){
@@ -139,7 +145,7 @@
             {id:'maxhp',name:'Darah Maks +25',icon:'❤️',desc:'+25 HP maksimal',rarity:'common',apply:()=>{player.maxHp+=25;player.hp+=25},evolutions:[{count:5,desc:'Evolusi I: +50 HP',apply:()=>{player.maxHp+=50;player.hp+=50}}]},
             {id:'multishot',name:'Multi-Tembak +1',icon:'🎯',desc:'+1 proyektil',rarity:'rare',apply:()=>{player.projectileCount++},evolutions:[{count:5,desc:'Evolusi I: +2 proyektil',apply:()=>{player.projectileCount+=2}}]},
             {id:'pierce',name:'Tembus +1',icon:'💠',desc:'Proyektil menembus 1 musuh',rarity:'rare',apply:()=>{player.pierce++},evolutions:[{count:5,desc:'Evolusi I: Tembus +2',apply:()=>{player.pierce+=2}}]},
-            {id:'orbital',name:'Pisau Orbit BESAR',icon:'🗡️',desc:'Pisau raksasa berputar (radius 80)',rarity:'legendary',apply:()=>{player.orbitalBlades++;player.orbitalRadius=80;player.orbitalSize=22},evolutions:[{count:5,desc:'Evolusi I: +3 pisau',apply:()=>{player.orbitalBlades+=3}},{count:10,desc:'Evolusi II: +6 pisau',apply:()=>{player.orbitalBlades+=6}}]},
+            {id:'throwing_knife',name:'Pisau Lempar',icon:'🔪',desc:'Lempar pisau ke musuh terdekat tiap 1 detik',rarity:'legendary',apply:()=>{player.throwingKnives++;player.throwingKnifeCooldown=0},evolutions:[{count:5,desc:'Evolusi I: +2 pisau per lemparan',apply:()=>{player.throwingKnives+=2}},{count:10,desc:'Evolusi II: +3 pisau per lemparan',apply:()=>{player.throwingKnives+=3}}]},
             {id:'lightning',name:'Petir Otomatis',icon:'⚡',desc:'Sambar musuh acak',rarity:'legendary',apply:()=>{player.lightningEnabled=true;player.lightningCooldown=Math.min(player.lightningCooldown,3)},evolutions:[{count:5,desc:'Evolusi I: Cooldown 2 detik',apply:()=>{player.lightningCooldown=Math.min(player.lightningCooldown,2)}}]},
             {id:'crit',name:'Critical +10%',icon:'💥',desc:'10% chance 2.5x damage',rarity:'epic',apply:()=>{player.critChance+=0.10},evolutions:[{count:5,desc:'Evolusi I: +20% crit',apply:()=>{player.critChance+=0.20}}]},
             {id:'regen',name:'Regenerasi',icon:'✨',desc:'+1 HP/detik',rarity:'epic',apply:()=>{player.hpRegen+=1},evolutions:[{count:5,desc:'Evolusi I: +3 HP/detik',apply:()=>{player.hpRegen+=3}}]},
@@ -153,14 +159,14 @@
             {id:'laser_orbital',name:'Laser Orbital',icon:'🔴',desc:'Bola laser mengorbit & tembak tiap 3 detik',rarity:'legendary',apply:()=>{player.laserOrbital=true;player.laserCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Laser lebih cepat',apply:()=>{player.laserCooldown=Math.min(player.laserCooldown,2)}}]},
             {id:'bonus_xp',name:'Bonus XP',icon:'✨',desc:'Dapatkan 30 XP sekarang',rarity:'common',apply:()=>{gainXP(30)}},
             {id:'xp_boost',name:'Peningkat XP',icon:'📈',desc:'+50% XP dari semua sumber',rarity:'epic',apply:()=>{player.xpGainMult*=1.5}},
-            {id:'drone',name:'Drone Tempur',icon:'🤖',desc:'Drone mengikuti & menembak otomatis',rarity:'legendary',apply:()=>{player.droneCount++;player.droneCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Drone lebih cepat',apply:()=>{player.droneFireRate=(player.droneFireRate||1.5)*0.7}},{count:10,desc:'Evolusi II: Drone dobel',apply:()=>{player.droneCount+=2}}]},
+            {id:'drone',name:'Drone Tempur',icon:'🤖',desc:'Drone menempel & menembak otomatis',rarity:'legendary',apply:()=>{player.droneCount++;player.droneCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Drone lebih cepat',apply:()=>{player.droneFireRate=(player.droneFireRate||1.5)*0.7}},{count:10,desc:'Evolusi II: Drone dobel',apply:()=>{player.droneCount+=2}}]},
             {id:'plane',name:'Pesawat Tempur',icon:'✈️',desc:'Pesawat menjatuhkan bom tiap 8 detik',rarity:'legendary',apply:()=>{player.planeEnabled=true;player.planeCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Bom lebih cepat',apply:()=>{player.planeCooldown=Math.min(player.planeCooldown,6)}},{count:10,desc:'Evolusi II: Bom dobel',apply:()=>{player.planeDoubleBomb=true}}]},
             {id:'bomb',name:'Bom',icon:'💣',desc:'Jatuhkan bom ke area musuh',rarity:'epic',apply:()=>{player.bombEnabled=true;player.bombCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Bom lebih besar',apply:()=>{player.bombRadius=(player.bombRadius||120)*1.5}},{count:10,desc:'Evolusi II: Bom ganda',apply:()=>{player.bombDouble=true}}]},
         ];
         function getRandomUpgrades(l){let pool=upgradePool.filter(u=>!u.milestoneOnly);if(milestoneLevels.includes(l))pool=upgradePool.filter(u=>u.milestoneOnly||u.rarity==='legendary'||u.rarity==='epic'||u.rarity==='mythic');return[...pool].sort(()=>Math.random()-0.5).slice(0,3)}
-        const player={x:worldSize/2,y:worldSize/2,radius:16,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,orbitalBlades:0,orbitalRadius:80,orbitalSize:22,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false};
-        function resetPlayer(){Object.assign(player,{x:worldSize/2,y:worldSize/2,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,orbitalBlades:0,orbitalRadius:80,orbitalSize:22,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false})}
-        let enemies=[],projectiles=[],particles=[],xpOrbs=[],damageTexts=[],lightningBolts=[],backgroundStars=[],bosses=[],disasters=[],areaEffects=[],drones=[],planes=[],bombs=[];
+        const player={x:worldSize/2,y:worldSize/2,radius:16,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false};
+        function resetPlayer(){Object.assign(player,{x:worldSize/2,y:worldSize/2,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false})}
+        let enemies=[],projectiles=[],particles=[],xpOrbs=[],damageTexts=[],lightningBolts=[],backgroundStars=[],bosses=[],disasters=[],areaEffects=[],bombs=[];
         function initStars(){backgroundStars=[];for(let i=0;i<500;i++)backgroundStars.push({x:Math.random()*worldSize,y:Math.random()*worldSize,r:Math.random()*1.8+0.5,a:Math.random()*0.6+0.2,twinkle:Math.random()*6})}
         initStars();
         const enemyTypes=[
@@ -177,13 +183,35 @@
             {type:'lightning',name:'RAJA PETIR',hp:400,speed:70,radius:35,color:'#ffcc00',glow:'#ffff00',damage:24,element:'⚡',skill:'Sambaran petir cepat'},
         ];
         function spawnBoss(){if(!gameRunning||gamePaused)return;const type=bossTypes[Math.floor(Math.random()*bossTypes.length)];const angle=Math.random()*Math.PI*2;const dist=600;let x=player.x+Math.cos(angle)*dist,y=player.y+Math.sin(angle)*dist;x=Math.max(100,Math.min(worldSize-100,x));y=Math.max(100,Math.min(worldSize-100,y));const hpScale=1+gameTime*0.05;bosses.push({x,y,hp:type.hp*hpScale,maxHp:type.hp*hpScale,radius:type.radius,speed:type.speed,color:type.color,glow:type.glow,damage:type.damage,name:type.name,element:type.element,type:type.type,hitFlash:0,wobble:Math.random()*6.28,attackCooldown:2,skillCooldown:3});const alert=document.getElementById('disaster-alert');alert.textContent=type.element+' '+type.name+' MUNCUL!';alert.style.color=type.glow;alert.style.display='block';setTimeout(()=>{alert.style.display='none'},3000)}
-        function triggerDisaster(){const types=['meteor','earthquake','blizzard','lightningstorm','tsunami'];const type=types[Math.floor(Math.random()*types.length)];const alert=document.getElementById('disaster-alert');alert.style.display='block';
-            if(type==='meteor'){alert.textContent='☄️ HUJAN METEOR!';alert.style.color='#ff6600';disasters.push({type:'meteor',timer:8,interval:0.5})}
-            else if(type==='earthquake'){alert.textContent='🌋 GEMPA BUMI!';alert.style.color='#b8860b';screenShake=15;disasters.push({type:'earthquake',timer:6})}
-            else if(type==='blizzard'){alert.textContent='❄️ BADAI SALJU!';alert.style.color='#add8e6';disasters.push({type:'blizzard',timer:10})}
-            else if(type==='lightningstorm'){alert.textContent='⚡ BADAI PETIR!';alert.style.color='#ffff00';disasters.push({type:'lightningstorm',timer:8,interval:1})}
-            else if(type==='tsunami'){alert.textContent='🌊 TSUNAMI DATANG!';alert.style.color='#00aaff';disasters.push({type:'tsunami',timer:12,waveX:0,speed:250,width:300})}
-            setTimeout(()=>{alert.style.display='none'},2000)}
+        function triggerDisaster(){
+            const types=['meteor','earthquake','blizzard','lightningstorm','tsunami'];
+            const type=types[Math.floor(Math.random()*types.length)];
+            const alert=document.getElementById('disaster-alert');
+            const flash=document.getElementById('disaster-flash');
+            alert.style.display='block';
+            if(type==='meteor'){
+                alert.textContent='☄️ HUJAN METEOR!'; alert.style.color='#ff6600';
+                flash.style.background='rgba(255,102,0,0.3)';
+                disasters.push({type:'meteor',timer:8,interval:0.5});
+            } else if(type==='earthquake'){
+                alert.textContent='🌋 GEMPA BUMI!'; alert.style.color='#b8860b';
+                flash.style.background='rgba(184,134,11,0.4)';
+                screenShake=15; disasters.push({type:'earthquake',timer:6});
+            } else if(type==='blizzard'){
+                alert.textContent='❄️ BADAI SALJU!'; alert.style.color='#add8e6';
+                flash.style.background='rgba(173,216,230,0.4)';
+                disasters.push({type:'blizzard',timer:10});
+            } else if(type==='lightningstorm'){
+                alert.textContent='⚡ BADAI PETIR!'; alert.style.color='#ffff00';
+                flash.style.background='rgba(255,255,0,0.4)';
+                disasters.push({type:'lightningstorm',timer:8,interval:1});
+            } else if(type==='tsunami'){
+                alert.textContent='🌊 TSUNAMI DATANG!'; alert.style.color='#00aaff';
+                flash.style.background='rgba(0,170,255,0.5)';
+                disasters.push({type:'tsunami',timer:12,waveX:0,speed:250,width:300});
+            }
+            setTimeout(()=>{ alert.style.display='none'; flash.style.background='rgba(0,0,0,0)'; }, 3000);
+        }
         function spawnEnemy(){if(!gameRunning||gamePaused)return;const angle=Math.random()*Math.PI*2;const dist=500+Math.random()*400;let x=player.x+Math.cos(angle)*dist,y=player.y+Math.sin(angle)*dist;x=Math.max(50,Math.min(worldSize-50,x));y=Math.max(50,Math.min(worldSize-50,y));const r=Math.random();let ti=0,c=0;for(let i=0;i<enemyTypes.length;i++){c+=[0.45,0.25,0.18,0.12][i];if(r<c){ti=i;break}}const t=enemyTypes[ti];const hpM=1+gameTime*0.08;enemies.push({x,y,hp:t.hp*hpM,maxHp:t.hp*hpM,radius:t.radius*(1+Math.min(gameTime*0.01,0.5)),speed:t.speed*(1+gameTime*0.015),color:t.color,glow:t.glow,score:t.score,xpValue:t.xpValue,damage:t.damage,type:t.type,hitFlash:0,wobble:Math.random()*6.28,slowed:0,slowTimer:0,poisoned:0,poisonTimer:0})}
         function fireProjectile(){const target=findNearestEnemy();if(!target)return;const angle=Math.atan2(target.y-player.y,target.x-player.x);const count=player.projectileCount;for(let i=0;i<count;i++){const off=(i-(count-1)/2)*0.12;const fa=angle+off;projectiles.push({x:player.x,y:player.y,vx:Math.cos(fa)*520,vy:Math.sin(fa)*520,damage:10*player.damageMult,pierce:player.pierce,hitEnemies:new Set(),radius:5,color:'#00f0ff',glow:'#00aaff',life:1.8})}
         shootSnd()}
@@ -220,10 +248,9 @@
         const keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key==='ArrowUp')keys['w']=true;if(e.key==='ArrowDown')keys['s']=true;if(e.key==='ArrowLeft')keys['a']=true;if(e.key==='ArrowRight')keys['d']=true});addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key==='ArrowUp')keys['w']=false;if(e.key==='ArrowDown')keys['s']=false;if(e.key==='ArrowLeft')keys['a']=false;if(e.key==='ArrowRight')keys['d']=false});
         let touchX=null,touchY=null;canvas.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];touchX=t.clientX;touchY=t.clientY});canvas.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];touchX=t.clientX;touchY=t.clientY});canvas.addEventListener('touchend',()=>{touchX=null;touchY=null});
         let mDown=false;canvas.addEventListener('mousedown',e=>{mDown=true;mouseX=e.clientX;mouseY=e.clientY;touchX=e.clientX;touchY=e.clientY});canvas.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;if(mDown){touchX=e.clientX;touchY=e.clientY}});canvas.addEventListener('mouseup',()=>{mDown=false;touchX=null;touchY=null});
-        window.startGame=function(){initAudio();document.getElementById('start-overlay').classList.add('hidden');gameRunning=true;gamePaused=false;gameTime=0;kills=0;level=1;xp=0;xpToNext=20;bossesKilled=0;resetPlayer();enemies=[];projectiles=[];particles=[];xpOrbs=[];damageTexts=[];lightningBolts=[];bosses=[];disasters=[];areaEffects=[];drones=[];planes=[];bombs=[];screenShake=0;updateHealthUI();updateXPUI();updateKillUI();updateLevelUI();updateTimerUI();updateBestRecordUI();document.getElementById('go-bosses').textContent='0';document.getElementById('game-over-overlay').classList.remove('active');document.getElementById('upgrade-overlay').classList.remove('active');document.getElementById('boss-bar-container').style.display='none'};window.restartGame=()=>window.startGame();
+        window.startGame=function(){initAudio();document.getElementById('start-overlay').classList.add('hidden');gameRunning=true;gamePaused=false;gameTime=0;kills=0;level=1;xp=0;xpToNext=20;bossesKilled=0;resetPlayer();enemies=[];projectiles=[];particles=[];xpOrbs=[];damageTexts=[];lightningBolts=[];bosses=[];disasters=[];areaEffects=[];bombs=[];screenShake=0;updateHealthUI();updateXPUI();updateKillUI();updateLevelUI();updateTimerUI();updateBestRecordUI();document.getElementById('go-bosses').textContent='0';document.getElementById('game-over-overlay').classList.remove('active');document.getElementById('upgrade-overlay').classList.remove('active');document.getElementById('boss-bar-container').style.display='none'};window.restartGame=()=>window.startGame();
         let enemySpawnTimer=0,bossSpawnTimer=45,disasterTimer=30;
         function update(dt){if(!gameRunning||gamePaused)return;gameTime+=dt;updateTimerUI();if(player.shieldCooldown>0)player.shieldCooldown-=dt;
-            // Perbaikan slow: gunakan slowFactor, reset setelah timer habis
             if(player.slowTimer>0){player.slowTimer-=dt;if(player.slowTimer<=0){player.slowFactor=1;}}
             player.speedMult=player.baseSpeedMult*player.slowFactor;
             if(player.hpRegen>0){player.hp=Math.min(player.maxHp,player.hp+player.hpRegen*dt);updateHealthUI()}if(player.invincible>0)player.invincible-=dt;
@@ -231,15 +258,14 @@
             if(touchX!==null&&touchY!==null){const cx=touchX-W/2,cy=touchY-H/2,l=Math.sqrt(cx*cx+cy*cy);if(l>30){dx=cx/l;dy=cy/l}}
             if(dx!==0||dy!==0){const l=Math.sqrt(dx*dx+dy*dy);player.x+=dx/l*player.baseSpeed*player.speedMult*dt;player.y+=dy/l*player.baseSpeed*player.speedMult*dt}
             player.x=Math.max(player.radius,Math.min(worldSize-player.radius,player.x));player.y=Math.max(player.radius,Math.min(worldSize-player.radius,player.y));
-            // TRAIL DIHAPUS - tidak ada trail
             const efr=player.baseFireRate*player.fireRateMult;player.fireCooldown-=dt;if(player.fireCooldown<=0&&(enemies.length>0||bosses.length>0)){fireProjectile();player.fireCooldown=1/efr}
             if(player.lightningEnabled){player.lightningCooldown-=dt;if(player.lightningCooldown<=0){const targets=enemies.length>0?enemies:bosses;if(targets.length>0){const t=targets[Math.floor(Math.random()*targets.length)];spawnLightningBolt(t)}player.lightningCooldown=3}}
+            if(player.throwingKnives>0){player.throwingKnifeCooldown-=dt;if(player.throwingKnifeCooldown<=0){player.throwingKnifeCooldown=1;const target=findNearestEnemy();if(target){const angle=Math.atan2(target.y-player.y,target.x-player.x);for(let i=0;i<player.throwingKnives;i++){const spread=(i-(player.throwingKnives-1)/2)*0.2;const fa=angle+spread;projectiles.push({x:player.x,y:player.y,vx:Math.cos(fa)*600,vy:Math.sin(fa)*600,damage:25*player.damageMult,pierce:0,hitEnemies:new Set(),radius:7,color:'#c86bff',glow:'#c86bff',life:1.5,type:'knife'});}spawnParticles(player.x,player.y,'#c86bff',5,80,0.2,2);}}}
             if(player.laserOrbital){player.laserCooldown-=dt;player.laserAngle+=dt*2.5;if(player.laserCooldown<=0){player.laserCooldown=3;const target=findNearestEnemy();if(target){const orbX=player.x+Math.cos(player.laserAngle)*80;const orbY=player.y+Math.sin(player.laserAngle)*80;const angle=Math.atan2(target.y-orbY,target.x-orbX);projectiles.push({x:orbX,y:orbY,vx:Math.cos(angle)*700,vy:Math.sin(angle)*700,damage:40*player.damageMult,pierce:5,hitEnemies:new Set(),radius:14,color:'#ff0000',glow:'#ff4444',life:1.5})}}}
-            if(player.droneCount>0){player.droneCooldown-=dt;if(player.droneCooldown<=0){player.droneCooldown=player.droneFireRate;const target=findNearestEnemy();if(target){for(let i=0;i<player.droneCount;i++){const da=gameTime*3+i*6.28/player.droneCount;const dxp=player.x+Math.cos(da)*60;const dyp=player.y+Math.sin(da)*60;const angle=Math.atan2(target.y-dyp,target.x-dxp);projectiles.push({x:dxp,y:dyp,vx:Math.cos(angle)*450,vy:Math.sin(angle)*450,damage:15*player.damageMult,pierce:0,hitEnemies:new Set(),radius:4,color:'#00ff88',glow:'#00cc66',life:1.2})}}}}
+            if(player.droneCount>0){player.droneCooldown-=dt;if(player.droneCooldown<=0){player.droneCooldown=player.droneFireRate;const target=findNearestEnemy();if(target){for(let i=0;i<player.droneCount;i++){const angleOffset=(i*2*Math.PI/player.droneCount);const dxp=player.x+Math.cos(angleOffset)*70;const dyp=player.y+Math.sin(angleOffset)*70;const angle=Math.atan2(target.y-dyp,target.x-dxp);projectiles.push({x:dxp,y:dyp,vx:Math.cos(angle)*450,vy:Math.sin(angle)*450,damage:15*player.damageMult,pierce:0,hitEnemies:new Set(),radius:4,color:'#00ff88',glow:'#00cc66',life:1.2})}}}}
             if(player.planeEnabled){player.planeCooldown-=dt;if(player.planeCooldown<=0){player.planeCooldown=8;const target=findNearestEnemy();if(target){spawnBomb(target.x,target.y,player.bombRadius);if(player.planeDoubleBomb){spawnBomb(target.x+80,target.y+80,player.bombRadius)}}}}
             if(player.bombEnabled){player.bombCooldown-=dt;if(player.bombCooldown<=0){player.bombCooldown=6;const target=findNearestEnemy();if(target){spawnBomb(target.x,target.y,player.bombRadius);if(player.bombDouble){spawnBomb(target.x-50,target.y+50,player.bombRadius)}}}}
             if(player.fireAura){const ad=player.fireAuraDamage||5;for(const e of enemies){if(Math.sqrt((e.x-player.x)**2+(e.y-player.y)**2)<80)damageEnemy(e,ad*player.damageMult*dt)}}
-            if(player.orbitalBlades>0){for(let i=0;i<player.orbitalBlades;i++){const a=gameTime*2.5+i*6.28/player.orbitalBlades,bx=player.x+Math.cos(a)*player.orbitalRadius,by=player.y+Math.sin(a)*player.orbitalRadius;for(const e of enemies){if(Math.sqrt((e.x-bx)**2+(e.y-by)**2)<e.radius+player.orbitalSize)damageEnemy(e,20*player.damageMult)}for(const b of bosses){if(Math.sqrt((b.x-bx)**2+(b.y-by)**2)<b.radius+player.orbitalSize)damageEnemy(b,25*player.damageMult)}}}
             for(let i=bombs.length-1;i>=0;i--){bombs[i].timer-=dt;if(bombs[i].timer<=0){explodeBomb(bombs[i]);bombs.splice(i,1)}}
             enemySpawnTimer-=dt;if(enemySpawnTimer<=0){spawnEnemy();enemySpawnTimer=Math.max(0.3,1.0-gameTime*0.005)}
             bossSpawnTimer-=dt;if(bossSpawnTimer<=0){spawnBoss();bossSpawnTimer=45}
@@ -272,13 +298,36 @@
             const gs=100,stx=Math.floor(cx/gs)*gs,sty=Math.floor(cy/gs)*gs;ctx.strokeStyle='rgba(40,50,80,0.35)';ctx.lineWidth=1;
             for(let x=stx;x<cx+W+gs;x+=gs){ctx.beginPath();ctx.moveTo(x,cy-20);ctx.lineTo(x,cy+H+20);ctx.stroke()}for(let y=sty;y<cy+H+gs;y+=gs){ctx.beginPath();ctx.moveTo(cx-20,y);ctx.lineTo(cx+W+20,y);ctx.stroke()}
             for(const s of backgroundStars){s.twinkle+=0.03;ctx.fillStyle=`rgba(200,220,255,${s.a*(0.6+0.4*Math.sin(s.twinkle))})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.28);ctx.fill()}
+            // Visual bencana yang lebih dramatis
+            for(const d of disasters){
+                if(d.type==='tsunami'){
+                    ctx.fillStyle='rgba(0,170,255,0.6)';
+                    ctx.fillRect(d.waveX,0,d.width,worldSize);
+                    ctx.fillStyle='rgba(255,255,255,0.7)';
+                    ctx.fillRect(d.waveX,0,8,worldSize);
+                    ctx.fillStyle='rgba(255,255,255,0.4)';
+                    ctx.fillRect(d.waveX+d.width-8,0,8,worldSize);
+                }
+                if(d.type==='meteor'){
+                    // Meteor sudah pakai partikel, tapi kita tambahkan garis jatuh
+                    // Tidak perlu di sini
+                }
+                if(d.type==='lightningstorm'){
+                    // Petir sudah pakai partikel kuning
+                }
+                if(d.type==='blizzard'){
+                    // Badai salju dengan partikel biru, sudah ditangani update
+                }
+                if(d.type==='earthquake'){
+                    // Gempa dengan screen shake, sudah ada
+                }
+            }
             for(const o of xpOrbs){const g2=14+Math.sin(gameTime*5+o.x)*4;const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,g2);g.addColorStop(0,'rgba(0,255,136,0.8)');g.addColorStop(1,'rgba(0,200,100,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,g2,0,6.28);ctx.fill();ctx.fillStyle='#00ff88';ctx.beginPath();ctx.arc(o.x,o.y,o.radius,0,6.28);ctx.fill()}
             for(const e of enemies){ctx.fillStyle=e.hitFlash>0?'#fff':e.color;ctx.shadowColor=e.glow;ctx.shadowBlur=18;ctx.beginPath();ctx.arc(e.x,e.y,e.radius,0,6.28);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(e.x,e.y,e.radius,0,6.28);ctx.stroke()}
             for(const b of bosses){ctx.fillStyle=b.hitFlash>0?'#fff':b.color;ctx.shadowColor=b.glow;ctx.shadowBlur=30;ctx.beginPath();ctx.arc(b.x,b.y,b.radius,0,6.28);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=b.glow;ctx.lineWidth=4;ctx.beginPath();ctx.arc(b.x,b.y,b.radius+5,0,6.28);ctx.stroke();ctx.font='24px sans-serif';ctx.textAlign='center';ctx.fillText(b.element,b.x,b.y-b.radius-15)}
-            for(const p of projectiles){ctx.fillStyle='#fff';ctx.shadowColor=p.glow;ctx.shadowBlur=16;ctx.beginPath();ctx.arc(p.x,p.y,p.radius,0,6.28);ctx.fill();ctx.shadowBlur=0}
+            for(const p of projectiles){ctx.fillStyle=p.type==='knife'?'#c86bff':'#fff';ctx.shadowColor=p.glow;ctx.shadowBlur=16;ctx.beginPath();ctx.arc(p.x,p.y,p.radius,0,6.28);ctx.fill();ctx.shadowBlur=0}
             for(const b of bombs){ctx.fillStyle='#333';ctx.shadowColor='#ff6600';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(b.x,b.y,12,0,6.28);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#ff0000';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText('💣',b.x,b.y+3)}
-            if(player.droneCount>0){for(let i=0;i<player.droneCount;i++){const da=gameTime*3+i*6.28/player.droneCount;const dxp=player.x+Math.cos(da)*60;const dyp=player.y+Math.sin(da)*60;ctx.fillStyle='#00ff88';ctx.shadowColor='#00ff88';ctx.shadowBlur=20;ctx.fillRect(dxp-8,dyp-6,16,12);ctx.fillStyle='#fff';ctx.fillRect(dxp-4,dyp-8,8,4);ctx.shadowBlur=0}}
-            if(player.orbitalBlades>0){for(let i=0;i<player.orbitalBlades;i++){const a=gameTime*2.5+i*6.28/player.orbitalBlades,bx=player.x+Math.cos(a)*player.orbitalRadius,by=player.y+Math.sin(a)*player.orbitalRadius;ctx.fillStyle='#c86bff';ctx.shadowColor='#c86bff';ctx.shadowBlur=25;ctx.save();ctx.translate(bx,by);ctx.rotate(a+Math.PI/2);ctx.beginPath();ctx.moveTo(0,-player.orbitalSize);ctx.lineTo(8,0);ctx.lineTo(0,player.orbitalSize*0.7);ctx.lineTo(-8,0);ctx.closePath();ctx.fill();ctx.restore();ctx.shadowBlur=0}}
+            if(player.droneCount>0){for(let i=0;i<player.droneCount;i++){const angleOffset=i*2*Math.PI/player.droneCount;const dxp=player.x+Math.cos(angleOffset)*70;const dyp=player.y+Math.sin(angleOffset)*70;ctx.fillStyle='#00ff88';ctx.shadowColor='#00ff88';ctx.shadowBlur=20;ctx.fillRect(dxp-8,dyp-6,16,12);ctx.fillStyle='#fff';ctx.fillRect(dxp-4,dyp-8,8,4);ctx.shadowBlur=0}}
             if(player.laserOrbital){const ox=player.x+Math.cos(player.laserAngle)*80;const oy=player.y+Math.sin(player.laserAngle)*80;ctx.fillStyle='#ff2222';ctx.shadowColor='#ff0000';ctx.shadowBlur=30;ctx.beginPath();ctx.arc(ox,oy,16,0,6.28);ctx.fill();ctx.shadowBlur=0}
             const pg=ctx.createRadialGradient(player.x,player.y,0,player.x,player.y,player.radius*3.5);pg.addColorStop(0,'rgba(0,240,255,0.5)');pg.addColorStop(1,'rgba(0,240,255,0)');ctx.fillStyle=pg;ctx.beginPath();ctx.arc(player.x,player.y,player.radius*3.5,0,6.28);ctx.fill();
             ctx.fillStyle='#00e5ff';ctx.shadowColor='#00f0ff';ctx.shadowBlur=24;ctx.beginPath();ctx.arc(player.x,player.y,player.radius,0,6.28);ctx.fill();ctx.shadowBlur=0;
@@ -288,8 +337,7 @@
             const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.45)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H)}
         let lastTime=0;function loop(ts){const dt=Math.min((ts-lastTime)/1000,0.05);lastTime=ts;if(gameRunning&&!gamePaused)update(dt);render();requestAnimationFrame(loop)}requestAnimationFrame(loop);
         updateHealthUI();updateXPUI();updateLevelUI();updateTimerUI();updateBestRecordUI();
-        console.log('✅ Trail biru dihilangkan');
-        console.log('✅ Slow effect diperbaiki (tidak permanen)');
+        console.log('✅ UI bencana alam diperbaiki: alert besar, flash overlay, efek visual lebih jelas');
     })();
     </script>
 </body>
