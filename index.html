@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>⚡ SURVIVOR ULTRA - Bencana Alam HD</title>
+    <title>⚡ SURVIVOR ULTRA - Tornado</title>
     <style>
         :root {
             --bg: #0a0a12;
@@ -12,11 +12,6 @@
             --gold: #ffd700;
             --card-bg: rgba(18, 18, 35, 0.95);
             --card-border: rgba(0, 240, 255, 0.4);
-            --water: #00aaff;
-            --earth: #b8860b;
-            --ice: #add8e6;
-            --nature: #228b22;
-            --lightning: #ffff00;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -118,7 +113,7 @@
         </div>
         <div id="upgrade-overlay"><div id="upgrade-panel"></div></div>
         <div id="game-over-overlay"><div id="game-over-panel"><h1>GAME OVER</h1><div class="stats">⏱️ Bertahan: <span id="go-time">00:00</span><br>💀 Membunuh: <span id="go-kills">0</span><br>⭐ Level: <span id="go-level">1</span><br>👑 Bos: <span id="go-bosses">0</span></div><button id="restart-btn" onclick="restartGame()">MAIN LAGI</button></div></div>
-        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">⚡ BENCANA ALAM HD ⚡</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 XP berbeda per musuh • ⚡ Bos tiap 45 detik • 🌊 Tsunami</div></div></div>
+        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">🌪️ SKILL TORNADO 🌪️</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 XP berbeda per musuh • ⚡ Bos tiap 45 detik • 🌊 Tsunami</div></div></div>
     </div>
     <script>
     (function(){
@@ -134,6 +129,7 @@
         function levelSnd(){snd(523,1047,0.3,'sine',0.08)}
         function evoSnd(){snd(300,1200,0.5,'sine',0.08);snd(800,2400,0.3,'sine',0.08)}
         function bombSnd(){snd(100,50,0.8,'sawtooth',0.15)}
+        function tornadoSnd(){snd(200,50,0.6,'sine',0.1)}
         let gameRunning=false,gamePaused=false,gameTime=0,kills=0,level=1,xp=0,xpToNext=20,screenShake=0,mouseX=W/2,mouseY=H/2,bossesKilled=0;
         let bestKills=parseInt(localStorage.getItem('survivor_best_kills')||'0');
         let bestTime=parseInt(localStorage.getItem('survivor_best_time')||'0');
@@ -162,10 +158,16 @@
             {id:'drone',name:'Drone Tempur',icon:'🤖',desc:'Drone menempel & menembak otomatis',rarity:'legendary',apply:()=>{player.droneCount++;player.droneCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Drone lebih cepat',apply:()=>{player.droneFireRate=(player.droneFireRate||1.5)*0.7}},{count:10,desc:'Evolusi II: Drone dobel',apply:()=>{player.droneCount+=2}}]},
             {id:'plane',name:'Pesawat Tempur',icon:'✈️',desc:'Pesawat menjatuhkan bom tiap 8 detik',rarity:'legendary',apply:()=>{player.planeEnabled=true;player.planeCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Bom lebih cepat',apply:()=>{player.planeCooldown=Math.min(player.planeCooldown,6)}},{count:10,desc:'Evolusi II: Bom dobel',apply:()=>{player.planeDoubleBomb=true}}]},
             {id:'bomb',name:'Bom',icon:'💣',desc:'Jatuhkan bom ke area musuh',rarity:'epic',apply:()=>{player.bombEnabled=true;player.bombCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Bom lebih besar',apply:()=>{player.bombRadius=(player.bombRadius||120)*1.5}},{count:10,desc:'Evolusi II: Bom ganda',apply:()=>{player.bombDouble=true}}]},
+            // TORNADO SKILL
+            {id:'tornado',name:'Tornado',icon:'🌪️',desc:'Muncul tornado yang menarik musuh',rarity:'legendary',apply:()=>{player.tornadoEnabled=true;player.tornadoCooldown=0;player.tornadoRadius=150;player.tornadoDamage=20;player.tornadoPull=100;player.tornadoDuration=5},evolutions:[
+                {count:5,desc:'Evolusi I: Mengisap kuat',apply:()=>{player.tornadoPull=250;player.tornadoRadius*=1.2}},
+                {count:10,desc:'Evolusi II: Tornado Raksasa',apply:()=>{player.tornadoRadius*=1.5;player.tornadoDamage*=1.5;player.tornadoDuration+=2}},
+                {count:15,desc:'Evolusi III: Badai Super',apply:()=>{player.tornadoPull=400;player.tornadoDamage*=2;player.tornadoCooldown=Math.min(player.tornadoCooldown,8)}}
+            ]},
         ];
         function getRandomUpgrades(l){let pool=upgradePool.filter(u=>!u.milestoneOnly);if(milestoneLevels.includes(l))pool=upgradePool.filter(u=>u.milestoneOnly||u.rarity==='legendary'||u.rarity==='epic'||u.rarity==='mythic');return[...pool].sort(()=>Math.random()-0.5).slice(0,3)}
-        const player={x:worldSize/2,y:worldSize/2,radius:16,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false};
-        function resetPlayer(){Object.assign(player,{x:worldSize/2,y:worldSize/2,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false})}
+        const player={x:worldSize/2,y:worldSize/2,radius:16,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false,tornadoEnabled:false,tornadoCooldown:0,tornadoActive:false,tornadoTimer:0,tornadoX:0,tornadoY:0,tornadoRadius:150,tornadoDamage:20,tornadoPull:100,tornadoDuration:5};
+        function resetPlayer(){Object.assign(player,{x:worldSize/2,y:worldSize/2,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false,tornadoEnabled:false,tornadoCooldown:0,tornadoActive:false,tornadoTimer:0,tornadoX:0,tornadoY:0,tornadoRadius:150,tornadoDamage:20,tornadoPull:100,tornadoDuration:5})}
         let enemies=[],projectiles=[],particles=[],xpOrbs=[],damageTexts=[],lightningBolts=[],backgroundStars=[],bosses=[],disasters=[],areaEffects=[],bombs=[];
         function initStars(){backgroundStars=[];for(let i=0;i<500;i++)backgroundStars.push({x:Math.random()*worldSize,y:Math.random()*worldSize,r:Math.random()*1.8+0.5,a:Math.random()*0.6+0.2,twinkle:Math.random()*6})}
         initStars();
@@ -183,35 +185,13 @@
             {type:'lightning',name:'RAJA PETIR',hp:400,speed:70,radius:35,color:'#ffcc00',glow:'#ffff00',damage:24,element:'⚡',skill:'Sambaran petir cepat'},
         ];
         function spawnBoss(){if(!gameRunning||gamePaused)return;const type=bossTypes[Math.floor(Math.random()*bossTypes.length)];const angle=Math.random()*Math.PI*2;const dist=600;let x=player.x+Math.cos(angle)*dist,y=player.y+Math.sin(angle)*dist;x=Math.max(100,Math.min(worldSize-100,x));y=Math.max(100,Math.min(worldSize-100,y));const hpScale=1+gameTime*0.05;bosses.push({x,y,hp:type.hp*hpScale,maxHp:type.hp*hpScale,radius:type.radius,speed:type.speed,color:type.color,glow:type.glow,damage:type.damage,name:type.name,element:type.element,type:type.type,hitFlash:0,wobble:Math.random()*6.28,attackCooldown:2,skillCooldown:3});const alert=document.getElementById('disaster-alert');alert.textContent=type.element+' '+type.name+' MUNCUL!';alert.style.color=type.glow;alert.style.display='block';setTimeout(()=>{alert.style.display='none'},3000)}
-        function triggerDisaster(){
-            const types=['meteor','earthquake','blizzard','lightningstorm','tsunami'];
-            const type=types[Math.floor(Math.random()*types.length)];
-            const alert=document.getElementById('disaster-alert');
-            const flash=document.getElementById('disaster-flash');
-            alert.style.display='block';
-            if(type==='meteor'){
-                alert.textContent='☄️ HUJAN METEOR!'; alert.style.color='#ff6600';
-                flash.style.background='rgba(255,102,0,0.3)';
-                disasters.push({type:'meteor',timer:8,interval:0.5});
-            } else if(type==='earthquake'){
-                alert.textContent='🌋 GEMPA BUMI!'; alert.style.color='#b8860b';
-                flash.style.background='rgba(184,134,11,0.4)';
-                screenShake=15; disasters.push({type:'earthquake',timer:6});
-            } else if(type==='blizzard'){
-                alert.textContent='❄️ BADAI SALJU!'; alert.style.color='#add8e6';
-                flash.style.background='rgba(173,216,230,0.4)';
-                disasters.push({type:'blizzard',timer:10});
-            } else if(type==='lightningstorm'){
-                alert.textContent='⚡ BADAI PETIR!'; alert.style.color='#ffff00';
-                flash.style.background='rgba(255,255,0,0.4)';
-                disasters.push({type:'lightningstorm',timer:8,interval:1});
-            } else if(type==='tsunami'){
-                alert.textContent='🌊 TSUNAMI DATANG!'; alert.style.color='#00aaff';
-                flash.style.background='rgba(0,170,255,0.5)';
-                disasters.push({type:'tsunami',timer:12,waveX:0,speed:250,width:300});
-            }
-            setTimeout(()=>{ alert.style.display='none'; flash.style.background='rgba(0,0,0,0)'; }, 3000);
-        }
+        function triggerDisaster(){const types=['meteor','earthquake','blizzard','lightningstorm','tsunami'];const type=types[Math.floor(Math.random()*types.length)];const alert=document.getElementById('disaster-alert');alert.style.display='block';
+            if(type==='meteor'){alert.textContent='☄️ HUJAN METEOR!';alert.style.color='#ff6600';disasters.push({type:'meteor',timer:8,interval:0.5})}
+            else if(type==='earthquake'){alert.textContent='🌋 GEMPA BUMI!';alert.style.color='#b8860b';screenShake=15;disasters.push({type:'earthquake',timer:6})}
+            else if(type==='blizzard'){alert.textContent='❄️ BADAI SALJU!';alert.style.color='#add8e6';disasters.push({type:'blizzard',timer:10})}
+            else if(type==='lightningstorm'){alert.textContent='⚡ BADAI PETIR!';alert.style.color='#ffff00';disasters.push({type:'lightningstorm',timer:8,interval:1})}
+            else if(type==='tsunami'){alert.textContent='🌊 TSUNAMI DATANG!';alert.style.color='#00aaff';disasters.push({type:'tsunami',timer:12,waveX:0,speed:250,width:300})}
+            setTimeout(()=>{alert.style.display='none'},2000)}
         function spawnEnemy(){if(!gameRunning||gamePaused)return;const angle=Math.random()*Math.PI*2;const dist=500+Math.random()*400;let x=player.x+Math.cos(angle)*dist,y=player.y+Math.sin(angle)*dist;x=Math.max(50,Math.min(worldSize-50,x));y=Math.max(50,Math.min(worldSize-50,y));const r=Math.random();let ti=0,c=0;for(let i=0;i<enemyTypes.length;i++){c+=[0.45,0.25,0.18,0.12][i];if(r<c){ti=i;break}}const t=enemyTypes[ti];const hpM=1+gameTime*0.08;enemies.push({x,y,hp:t.hp*hpM,maxHp:t.hp*hpM,radius:t.radius*(1+Math.min(gameTime*0.01,0.5)),speed:t.speed*(1+gameTime*0.015),color:t.color,glow:t.glow,score:t.score,xpValue:t.xpValue,damage:t.damage,type:t.type,hitFlash:0,wobble:Math.random()*6.28,slowed:0,slowTimer:0,poisoned:0,poisonTimer:0})}
         function fireProjectile(){const target=findNearestEnemy();if(!target)return;const angle=Math.atan2(target.y-player.y,target.x-player.x);const count=player.projectileCount;for(let i=0;i<count;i++){const off=(i-(count-1)/2)*0.12;const fa=angle+off;projectiles.push({x:player.x,y:player.y,vx:Math.cos(fa)*520,vy:Math.sin(fa)*520,damage:10*player.damageMult,pierce:player.pierce,hitEnemies:new Set(),radius:5,color:'#00f0ff',glow:'#00aaff',life:1.8})}
         shootSnd()}
@@ -261,6 +241,57 @@
             const efr=player.baseFireRate*player.fireRateMult;player.fireCooldown-=dt;if(player.fireCooldown<=0&&(enemies.length>0||bosses.length>0)){fireProjectile();player.fireCooldown=1/efr}
             if(player.lightningEnabled){player.lightningCooldown-=dt;if(player.lightningCooldown<=0){const targets=enemies.length>0?enemies:bosses;if(targets.length>0){const t=targets[Math.floor(Math.random()*targets.length)];spawnLightningBolt(t)}player.lightningCooldown=3}}
             if(player.throwingKnives>0){player.throwingKnifeCooldown-=dt;if(player.throwingKnifeCooldown<=0){player.throwingKnifeCooldown=1;const target=findNearestEnemy();if(target){const angle=Math.atan2(target.y-player.y,target.x-player.x);for(let i=0;i<player.throwingKnives;i++){const spread=(i-(player.throwingKnives-1)/2)*0.2;const fa=angle+spread;projectiles.push({x:player.x,y:player.y,vx:Math.cos(fa)*600,vy:Math.sin(fa)*600,damage:25*player.damageMult,pierce:0,hitEnemies:new Set(),radius:7,color:'#c86bff',glow:'#c86bff',life:1.5,type:'knife'});}spawnParticles(player.x,player.y,'#c86bff',5,80,0.2,2);}}}
+            // TORNADO LOGIC
+            if(player.tornadoEnabled){
+                if(!player.tornadoActive){
+                    player.tornadoCooldown -= dt;
+                    if(player.tornadoCooldown <= 0){
+                        player.tornadoActive = true;
+                        player.tornadoTimer = player.tornadoDuration;
+                        // Spawn di posisi pemain
+                        player.tornadoX = player.x;
+                        player.tornadoY = player.y;
+                        player.tornadoCooldown = 15; // cooldown setelah selesai
+                        tornadoSnd();
+                    }
+                } else {
+                    player.tornadoTimer -= dt;
+                    if(player.tornadoTimer <= 0){
+                        player.tornadoActive = false;
+                    } else {
+                        // Tarik musuh dan beri damage
+                        for(const e of enemies){
+                            const dx = e.x - player.tornadoX;
+                            const dy = e.y - player.tornadoY;
+                            const dist = Math.sqrt(dx*dx + dy*dy);
+                            if(dist < player.tornadoRadius){
+                                // Damage per detik
+                                damageEnemy(e, player.tornadoDamage * dt);
+                                // Tarik ke pusat
+                                if(dist > 5){
+                                    const pull = player.tornadoPull * dt * (1 - dist/player.tornadoRadius);
+                                    e.x -= (dx/dist) * pull;
+                                    e.y -= (dy/dist) * pull;
+                                }
+                            }
+                        }
+                        // Juga tarik bos (opsional, bisa dikurangi)
+                        for(const b of bosses){
+                            const dx = b.x - player.tornadoX;
+                            const dy = b.y - player.tornadoY;
+                            const dist = Math.sqrt(dx*dx + dy*dy);
+                            if(dist < player.tornadoRadius * 0.7){
+                                damageEnemy(b, player.tornadoDamage * 0.5 * dt);
+                                if(dist > 10){
+                                    const pull = player.tornadoPull * 0.3 * dt;
+                                    b.x -= (dx/dist) * pull;
+                                    b.y -= (dy/dist) * pull;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if(player.laserOrbital){player.laserCooldown-=dt;player.laserAngle+=dt*2.5;if(player.laserCooldown<=0){player.laserCooldown=3;const target=findNearestEnemy();if(target){const orbX=player.x+Math.cos(player.laserAngle)*80;const orbY=player.y+Math.sin(player.laserAngle)*80;const angle=Math.atan2(target.y-orbY,target.x-orbX);projectiles.push({x:orbX,y:orbY,vx:Math.cos(angle)*700,vy:Math.sin(angle)*700,damage:40*player.damageMult,pierce:5,hitEnemies:new Set(),radius:14,color:'#ff0000',glow:'#ff4444',life:1.5})}}}
             if(player.droneCount>0){player.droneCooldown-=dt;if(player.droneCooldown<=0){player.droneCooldown=player.droneFireRate;const target=findNearestEnemy();if(target){for(let i=0;i<player.droneCount;i++){const angleOffset=(i*2*Math.PI/player.droneCount);const dxp=player.x+Math.cos(angleOffset)*70;const dyp=player.y+Math.sin(angleOffset)*70;const angle=Math.atan2(target.y-dyp,target.x-dxp);projectiles.push({x:dxp,y:dyp,vx:Math.cos(angle)*450,vy:Math.sin(angle)*450,damage:15*player.damageMult,pierce:0,hitEnemies:new Set(),radius:4,color:'#00ff88',glow:'#00cc66',life:1.2})}}}}
             if(player.planeEnabled){player.planeCooldown-=dt;if(player.planeCooldown<=0){player.planeCooldown=8;const target=findNearestEnemy();if(target){spawnBomb(target.x,target.y,player.bombRadius);if(player.planeDoubleBomb){spawnBomb(target.x+80,target.y+80,player.bombRadius)}}}}
@@ -298,28 +329,30 @@
             const gs=100,stx=Math.floor(cx/gs)*gs,sty=Math.floor(cy/gs)*gs;ctx.strokeStyle='rgba(40,50,80,0.35)';ctx.lineWidth=1;
             for(let x=stx;x<cx+W+gs;x+=gs){ctx.beginPath();ctx.moveTo(x,cy-20);ctx.lineTo(x,cy+H+20);ctx.stroke()}for(let y=sty;y<cy+H+gs;y+=gs){ctx.beginPath();ctx.moveTo(cx-20,y);ctx.lineTo(cx+W+20,y);ctx.stroke()}
             for(const s of backgroundStars){s.twinkle+=0.03;ctx.fillStyle=`rgba(200,220,255,${s.a*(0.6+0.4*Math.sin(s.twinkle))})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.28);ctx.fill()}
-            // Visual bencana yang lebih dramatis
-            for(const d of disasters){
-                if(d.type==='tsunami'){
-                    ctx.fillStyle='rgba(0,170,255,0.6)';
-                    ctx.fillRect(d.waveX,0,d.width,worldSize);
-                    ctx.fillStyle='rgba(255,255,255,0.7)';
-                    ctx.fillRect(d.waveX,0,8,worldSize);
-                    ctx.fillStyle='rgba(255,255,255,0.4)';
-                    ctx.fillRect(d.waveX+d.width-8,0,8,worldSize);
-                }
-                if(d.type==='meteor'){
-                    // Meteor sudah pakai partikel, tapi kita tambahkan garis jatuh
-                    // Tidak perlu di sini
-                }
-                if(d.type==='lightningstorm'){
-                    // Petir sudah pakai partikel kuning
-                }
-                if(d.type==='blizzard'){
-                    // Badai salju dengan partikel biru, sudah ditangani update
-                }
-                if(d.type==='earthquake'){
-                    // Gempa dengan screen shake, sudah ada
+            // Render Tornado
+            if(player.tornadoActive){
+                const tx=player.tornadoX, ty=player.tornadoY;
+                const grad = ctx.createRadialGradient(tx,ty,0,tx,ty,player.tornadoRadius);
+                grad.addColorStop(0,'rgba(200,200,200,0.1)');
+                grad.addColorStop(0.5,'rgba(255,255,255,0.25)');
+                grad.addColorStop(1,'rgba(200,200,200,0)');
+                ctx.fillStyle=grad;
+                ctx.beginPath();
+                ctx.arc(tx,ty,player.tornadoRadius,0,6.28);
+                ctx.fill();
+                // Spiral lines
+                for(let i=0;i<3;i++){
+                    ctx.strokeStyle='rgba(255,255,255,0.3)';
+                    ctx.lineWidth=2;
+                    ctx.beginPath();
+                    for(let a=0;a<Math.PI*2;a+=0.1){
+                        const r = player.tornadoRadius * (0.3 + 0.2*Math.sin(a*3 + gameTime*5 + i));
+                        const x = tx + Math.cos(a + gameTime*2 + i)*r;
+                        const y = ty + Math.sin(a + gameTime*2 + i)*r;
+                        if(a===0) ctx.moveTo(x,y);
+                        else ctx.lineTo(x,y);
+                    }
+                    ctx.stroke();
                 }
             }
             for(const o of xpOrbs){const g2=14+Math.sin(gameTime*5+o.x)*4;const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,g2);g.addColorStop(0,'rgba(0,255,136,0.8)');g.addColorStop(1,'rgba(0,200,100,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,g2,0,6.28);ctx.fill();ctx.fillStyle='#00ff88';ctx.beginPath();ctx.arc(o.x,o.y,o.radius,0,6.28);ctx.fill()}
@@ -337,7 +370,7 @@
             const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.45)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H)}
         let lastTime=0;function loop(ts){const dt=Math.min((ts-lastTime)/1000,0.05);lastTime=ts;if(gameRunning&&!gamePaused)update(dt);render();requestAnimationFrame(loop)}requestAnimationFrame(loop);
         updateHealthUI();updateXPUI();updateLevelUI();updateTimerUI();updateBestRecordUI();
-        console.log('✅ UI bencana alam diperbaiki: alert besar, flash overlay, efek visual lebih jelas');
+        console.log('🌪️ Skill Tornado ditambahkan!');
     })();
     </script>
 </body>
