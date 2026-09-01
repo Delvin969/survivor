@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>⚡ SURVIVOR ULTRA - Tornado & Musuh Disesuaikan</title>
+    <title>⚡ SURVIVOR ULTRA - Final Boss & Skill</title>
     <style>
         :root {
             --bg: #0a0a12;
@@ -47,6 +47,10 @@
         #boss-bar-bg { background:rgba(0,0,0,0.8); border-radius:16px; height:12px; overflow:hidden; border:2px solid var(--gold); }
         #boss-bar-fill { height:100%; background:linear-gradient(90deg,#ff6600,#ffd700,#ff6600); border-radius:14px; transition:width 0.2s; box-shadow:0 0 16px rgba(255,215,0,0.9); }
         #boss-name { text-align:center; font-size:12px; font-weight:800; color:var(--gold); margin-top:2px; letter-spacing:2px; }
+        #final-boss-bar-container { position:absolute; top:100px; left:50%; transform:translateX(-50%); width:min(500px,70vw); pointer-events:none; display:none; }
+        #final-boss-bar-bg { background:rgba(0,0,0,0.8); border-radius:16px; height:14px; overflow:hidden; border:2px solid #ff00ff; }
+        #final-boss-bar-fill { height:100%; background:linear-gradient(90deg,#800080,#ff00ff,#800080); border-radius:14px; transition:width 0.2s; box-shadow:0 0 16px rgba(255,0,255,0.9); }
+        #final-boss-name { text-align:center; font-size:14px; font-weight:900; color:#ff00ff; margin-top:2px; letter-spacing:2px; }
         #upgrade-overlay { position:absolute; top:0; left:0; width:100%; height:100%; display:none; justify-content:center; align-items:center; pointer-events:all; z-index:20; background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); }
         #upgrade-overlay.active { display:flex; }
         #upgrade-panel { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; padding:20px; max-width:900px; }
@@ -108,12 +112,13 @@
             </div>
             <div id="disaster-alert"></div>
             <div id="boss-bar-container"><div id="boss-bar-bg"><div id="boss-bar-fill" style="width:100%"></div></div><div id="boss-name"></div></div>
+            <div id="final-boss-bar-container"><div id="final-boss-bar-bg"><div id="final-boss-bar-fill" style="width:100%"></div></div><div id="final-boss-name"></div></div>
             <div id="xp-bar-container"><div id="xp-bar-bg"><div id="xp-bar-fill" style="width:0%"></div></div><div id="xp-text">XP: 0 / 20</div></div>
             <div id="health-bar-container"><div id="health-bar-bg"><div id="health-bar-fill" style="width:100%"></div></div><div id="health-text">100 / 100</div></div>
         </div>
         <div id="upgrade-overlay"><div id="upgrade-panel"></div></div>
         <div id="game-over-overlay"><div id="game-over-panel"><h1>GAME OVER</h1><div class="stats">⏱️ Bertahan: <span id="go-time">00:00</span><br>💀 Membunuh: <span id="go-kills">0</span><br>⭐ Level: <span id="go-level">1</span><br>👑 Bos: <span id="go-bosses">0</span></div><button id="restart-btn" onclick="restartGame()">MAIN LAGI</button></div></div>
-        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">🌪️ TORNADO & MUSUH SEIMBANG 🌪️</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 XP berbeda per musuh • ⚡ Bos tiap 45 detik • 🌊 Tsunami</div></div></div>
+        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">🌪️ TORNADO & FINAL BOSS 🌪️</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 XP berbeda per musuh • ⚡ Bos tiap 45 detik • 🌊 Tsunami jelas</div></div></div>
     </div>
     <script>
     (function(){
@@ -130,6 +135,7 @@
         function evoSnd(){snd(300,1200,0.5,'sine',0.08);snd(800,2400,0.3,'sine',0.08)}
         function bombSnd(){snd(100,50,0.8,'sawtooth',0.15)}
         function tornadoSnd(){snd(200,50,0.6,'sine',0.1)}
+        function finalBossSnd(){snd(50,200,0.5,'sawtooth',0.15)}
         let gameRunning=false,gamePaused=false,gameTime=0,kills=0,level=1,xp=0,xpToNext=20,screenShake=0,mouseX=W/2,mouseY=H/2,bossesKilled=0;
         let bestKills=parseInt(localStorage.getItem('survivor_best_kills')||'0');
         let bestTime=parseInt(localStorage.getItem('survivor_best_time')||'0');
@@ -158,24 +164,30 @@
             {id:'drone',name:'Drone Tempur',icon:'🤖',desc:'Drone menempel & menembak otomatis',rarity:'legendary',apply:()=>{player.droneCount++;player.droneCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Drone lebih cepat',apply:()=>{player.droneFireRate=(player.droneFireRate||1.5)*0.7}},{count:10,desc:'Evolusi II: Drone dobel',apply:()=>{player.droneCount+=2}}]},
             {id:'plane',name:'Pesawat Tempur',icon:'✈️',desc:'Pesawat menjatuhkan bom tiap 8 detik',rarity:'legendary',apply:()=>{player.planeEnabled=true;player.planeCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Bom lebih cepat',apply:()=>{player.planeCooldown=Math.min(player.planeCooldown,6)}},{count:10,desc:'Evolusi II: Bom dobel',apply:()=>{player.planeDoubleBomb=true}}]},
             {id:'bomb',name:'Bom',icon:'💣',desc:'Jatuhkan bom ke area musuh',rarity:'epic',apply:()=>{player.bombEnabled=true;player.bombCooldown=0},evolutions:[{count:5,desc:'Evolusi I: Bom lebih besar',apply:()=>{player.bombRadius=(player.bombRadius||120)*1.5}},{count:10,desc:'Evolusi II: Bom ganda',apply:()=>{player.bombDouble=true}}]},
-            // TORNADO SKILL
             {id:'tornado',name:'Tornado',icon:'🌪️',desc:'Muncul tornado yang menarik musuh',rarity:'legendary',apply:()=>{player.tornadoEnabled=true;player.tornadoCooldown=0;player.tornadoRadius=150;player.tornadoDamage=20;player.tornadoPull=100;player.tornadoDuration=5},evolutions:[
                 {count:5,desc:'Evolusi I: Mengisap kuat',apply:()=>{player.tornadoPull=250;player.tornadoRadius*=1.2}},
                 {count:10,desc:'Evolusi II: Tornado Raksasa',apply:()=>{player.tornadoRadius*=1.5;player.tornadoDamage*=1.5;player.tornadoDuration+=2}},
                 {count:15,desc:'Evolusi III: Badai Super',apply:()=>{player.tornadoPull=400;player.tornadoDamage*=2;player.tornadoCooldown=Math.min(player.tornadoCooldown,8)}}
             ]},
+            // Skill baru tambahan
+            {id:'chain_lightning',name:'Petir Berantai',icon:'⚡',desc:'Petir melompat ke 3 musuh',rarity:'legendary',apply:()=>{player.chainLightning=true}},
+            {id:'poison_aura',name:'Aura Racun',icon:'☠️',desc:'Musuh di dekatmu terkena racun',rarity:'legendary',apply:()=>{player.poisonAura=true}},
+            {id:'reflect_shield',name:'Perisai Reflektif',icon:'🔰',desc:'30% damage dipantulkan',rarity:'legendary',apply:()=>{player.reflectShield=true}},
+            {id:'xp_steal',name:'Pencuri XP',icon:'🤑',desc:'+1 XP per kill',rarity:'rare',apply:()=>{player.xpSteal=(player.xpSteal||0)+1}},
+            {id:'attack_speed',name:'Kecepatan Serangan',icon:'⚡',desc:'+25% attack speed',rarity:'epic',apply:()=>{player.fireRateMult*=1.25}},
+            {id:'explosive_kills',name:'Ledakan Tiap Kill',icon:'💥',desc:'Musuh meledak saat mati',rarity:'legendary',apply:()=>{player.explosiveKills=true}},
         ];
         function getRandomUpgrades(l){let pool=upgradePool.filter(u=>!u.milestoneOnly);if(milestoneLevels.includes(l))pool=upgradePool.filter(u=>u.milestoneOnly||u.rarity==='legendary'||u.rarity==='epic'||u.rarity==='mythic');return[...pool].sort(()=>Math.random()-0.5).slice(0,3)}
-        const player={x:worldSize/2,y:worldSize/2,radius:16,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false,tornadoEnabled:false,tornadoCooldown:0,tornadoActive:false,tornadoTimer:0,tornadoX:0,tornadoY:0,tornadoRadius:150,tornadoDamage:20,tornadoPull:100,tornadoDuration:5};
-        function resetPlayer(){Object.assign(player,{x:worldSize/2,y:worldSize/2,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false,tornadoEnabled:false,tornadoCooldown:0,tornadoActive:false,tornadoTimer:0,tornadoX:0,tornadoY:0,tornadoRadius:150,tornadoDamage:20,tornadoPull:100,tornadoDuration:5})}
-        let enemies=[],projectiles=[],particles=[],xpOrbs=[],damageTexts=[],lightningBolts=[],backgroundStars=[],bosses=[],disasters=[],areaEffects=[],bombs=[];
+        const player={x:worldSize/2,y:worldSize/2,radius:16,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,poisonAura:false,reflectShield:false,chainLightning:false,xpSteal:0,explosiveKills:false,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false,tornadoEnabled:false,tornadoCooldown:0,tornadoActive:false,tornadoTimer:0,tornadoX:0,tornadoY:0,tornadoRadius:150,tornadoDamage:20,tornadoPull:100,tornadoDuration:5};
+        function resetPlayer(){Object.assign(player,{x:worldSize/2,y:worldSize/2,hp:100,maxHp:100,baseSpeedMult:1,speedMult:1,slowFactor:1,slowTimer:0,baseSpeed:220,damageMult:1,fireRateMult:1,baseFireRate:2.5,projectileCount:1,pierce:0,magnetMult:1,baseMagnet:120,critChance:0.05,hpRegen:0,throwingKnives:0,throwingKnifeCooldown:0,lightningEnabled:false,lightningCooldown:0,fireCooldown:0,invincible:0,fireAura:false,fireAuraDamage:5,lifesteal:0,energyShield:false,thornsDamage:0,poisonDamage:0,poisonAura:false,reflectShield:false,chainLightning:false,xpSteal:0,explosiveKills:false,bossDamageMult:1,shieldCooldown:0,upgradeCounts:{},xpGainMult:1,laserOrbital:false,laserCooldown:0,laserAngle:0,droneCount:0,droneCooldown:0,droneFireRate:1.5,planeEnabled:false,planeCooldown:0,planeDoubleBomb:false,bombEnabled:false,bombCooldown:0,bombRadius:120,bombDouble:false,tornadoEnabled:false,tornadoCooldown:0,tornadoActive:false,tornadoTimer:0,tornadoX:0,tornadoY:0,tornadoRadius:150,tornadoDamage:20,tornadoPull:100,tornadoDuration:5})}
+        let enemies=[],projectiles=[],particles=[],xpOrbs=[],damageTexts=[],lightningBolts=[],backgroundStars=[],bosses=[],finalBosses=[],disasters=[],areaEffects=[],bombs=[];
         function initStars(){backgroundStars=[];for(let i=0;i<500;i++)backgroundStars.push({x:Math.random()*worldSize,y:Math.random()*worldSize,r:Math.random()*1.8+0.5,a:Math.random()*0.6+0.2,twinkle:Math.random()*6})}
         initStars();
         const enemyTypes=[
-            {type:'basic',hp:30,speed:70,radius:14,color:'#e74c3c',glow:'#ff5555',score:1,damage:8,xpValue:2},
-            {type:'fast',hp:15,speed:90,radius:10,color:'#f39c12',glow:'#ffaa00',score:1,damage:5,xpValue:1}, // Kecepatan diturunkan dari 150 ke 90
-            {type:'tank',hp:90,speed:40,radius:22,color:'#8e44ad',glow:'#bb66ff',score:3,damage:15,xpValue:5},
-            {type:'brute',hp:50,speed:65,radius:18,color:'#e67e22',glow:'#ff8844',score:2,damage:10,xpValue:3}
+            {type:'basic',hp:30,speed:60,radius:14,color:'#e74c3c',glow:'#ff5555',score:1,damage:8,xpValue:2},
+            {type:'fast',hp:15,speed:75,radius:10,color:'#f39c12',glow:'#ffaa00',score:1,damage:5,xpValue:1},
+            {type:'tank',hp:90,speed:30,radius:22,color:'#8e44ad',glow:'#bb66ff',score:3,damage:15,xpValue:5},
+            {type:'brute',hp:50,speed:50,radius:18,color:'#e67e22',glow:'#ff8844',score:2,damage:10,xpValue:3}
         ];
         const bossTypes=[
             {type:'water',name:'RAJA AIR',hp:500,speed:50,radius:40,color:'#0066cc',glow:'#00aaff',damage:18,element:'💧',skill:'Semburan air luas'},
@@ -184,6 +196,11 @@
             {type:'nature',name:'RAJA ALAM',hp:550,speed:48,radius:42,color:'#228b22',glow:'#32cd32',damage:20,element:'🌿',skill:'Memanggil akar & musuh'},
             {type:'lightning',name:'RAJA PETIR',hp:400,speed:70,radius:35,color:'#ffcc00',glow:'#ffff00',damage:24,element:'⚡',skill:'Sambaran petir cepat'},
         ];
+        // Final Boss definition
+        const finalBossBase = {hp:2000, speed:40, radius:60, damage:30, color:'#4b0082', glow:'#ff00ff', name:'RAJA KEGELAPAN', element:'👿'};
+        function spawnFinalBoss(){if(!gameRunning||gamePaused)return;const scale = 1 + Math.floor(gameTime/300)*0.5; // makin kuat tiap 5 menit
+            finalBosses.push({...finalBossBase, hp:finalBossBase.hp*scale, maxHp:finalBossBase.hp*scale, speed:finalBossBase.speed*(1+scale*0.2), damage:finalBossBase.damage*scale, x:player.x+400, y:player.y+400});
+            const alert=document.getElementById('disaster-alert');alert.textContent='👿 RAJA KEGELAPAN MUNCUL!';alert.style.color='#ff00ff';alert.style.display='block';setTimeout(()=>{alert.style.display='none'},3000);finalBossSnd();}
         function spawnBoss(){if(!gameRunning||gamePaused)return;const type=bossTypes[Math.floor(Math.random()*bossTypes.length)];const angle=Math.random()*Math.PI*2;const dist=600;let x=player.x+Math.cos(angle)*dist,y=player.y+Math.sin(angle)*dist;x=Math.max(100,Math.min(worldSize-100,x));y=Math.max(100,Math.min(worldSize-100,y));const hpScale=1+gameTime*0.05;bosses.push({x,y,hp:type.hp*hpScale,maxHp:type.hp*hpScale,radius:type.radius,speed:type.speed,color:type.color,glow:type.glow,damage:type.damage,name:type.name,element:type.element,type:type.type,hitFlash:0,wobble:Math.random()*6.28,attackCooldown:2,skillCooldown:3});const alert=document.getElementById('disaster-alert');alert.textContent=type.element+' '+type.name+' MUNCUL!';alert.style.color=type.glow;alert.style.display='block';setTimeout(()=>{alert.style.display='none'},3000)}
         function triggerDisaster(){const types=['meteor','earthquake','blizzard','lightningstorm','tsunami'];const type=types[Math.floor(Math.random()*types.length)];const alert=document.getElementById('disaster-alert');alert.style.display='block';
             if(type==='meteor'){alert.textContent='☄️ HUJAN METEOR!';alert.style.color='#ff6600';disasters.push({type:'meteor',timer:8,interval:0.5})}
@@ -192,19 +209,19 @@
             else if(type==='lightningstorm'){alert.textContent='⚡ BADAI PETIR!';alert.style.color='#ffff00';disasters.push({type:'lightningstorm',timer:8,interval:1})}
             else if(type==='tsunami'){alert.textContent='🌊 TSUNAMI DATANG!';alert.style.color='#00aaff';disasters.push({type:'tsunami',timer:12,waveX:0,speed:250,width:300})}
             setTimeout(()=>{alert.style.display='none'},2000)}
-        function spawnEnemy(){if(!gameRunning||gamePaused)return;const angle=Math.random()*Math.PI*2;const dist=500+Math.random()*400;let x=player.x+Math.cos(angle)*dist,y=player.y+Math.sin(angle)*dist;x=Math.max(50,Math.min(worldSize-50,x));y=Math.max(50,Math.min(worldSize-50,y));const r=Math.random();let ti=0,c=0;for(let i=0;i<enemyTypes.length;i++){c+=[0.45,0.25,0.18,0.12][i];if(r<c){ti=i;break}}const t=enemyTypes[ti];const hpM=1+gameTime*0.08;enemies.push({x,y,hp:t.hp*hpM,maxHp:t.hp*hpM,radius:t.radius*(1+Math.min(gameTime*0.01,0.5)),speed:t.speed*(1+gameTime*0.008),color:t.color,glow:t.glow,score:t.score,xpValue:t.xpValue,damage:t.damage,type:t.type,hitFlash:0,wobble:Math.random()*6.28,slowed:0,slowTimer:0,poisoned:0,poisonTimer:0})}
+        function spawnEnemy(){if(!gameRunning||gamePaused)return;const angle=Math.random()*Math.PI*2;const dist=500+Math.random()*400;let x=player.x+Math.cos(angle)*dist,y=player.y+Math.sin(angle)*dist;x=Math.max(50,Math.min(worldSize-50,x));y=Math.max(50,Math.min(worldSize-50,y));const r=Math.random();let ti=0,c=0;for(let i=0;i<enemyTypes.length;i++){c+=[0.45,0.25,0.18,0.12][i];if(r<c){ti=i;break}}const t=enemyTypes[ti];const hpM=1+gameTime*0.08;enemies.push({x,y,hp:t.hp*hpM,maxHp:t.hp*hpM,radius:t.radius*(1+Math.min(gameTime*0.01,0.5)),speed:t.speed*(1+gameTime*0.005),color:t.color,glow:t.glow,score:t.score,xpValue:t.xpValue,damage:t.damage,type:t.type,hitFlash:0,wobble:Math.random()*6.28,slowed:0,slowTimer:0,poisoned:0,poisonTimer:0})}
         function fireProjectile(){const target=findNearestEnemy();if(!target)return;const angle=Math.atan2(target.y-player.y,target.x-player.x);const count=player.projectileCount;for(let i=0;i<count;i++){const off=(i-(count-1)/2)*0.12;const fa=angle+off;projectiles.push({x:player.x,y:player.y,vx:Math.cos(fa)*520,vy:Math.sin(fa)*520,damage:10*player.damageMult,pierce:player.pierce,hitEnemies:new Set(),radius:5,color:'#00f0ff',glow:'#00aaff',life:1.8})}
         shootSnd()}
-        function findNearestEnemy(){let n=null,m=Infinity;for(const e of enemies){const dx=e.x-player.x,dy=e.y-player.y,d=dx*dx+dy*dy;if(d<m){m=d;n=e}}for(const b of bosses){const dx=b.x-player.x,dy=b.y-player.y,d=dx*dx+dy*dy;if(d<m){m=d;n=b}}return n}
+        function findNearestEnemy(){let n=null,m=Infinity;for(const e of enemies){const dx=e.x-player.x,dy=e.y-player.y,d=dx*dx+dy*dy;if(d<m){m=d;n=e}}for(const b of bosses){const dx=b.x-player.x,dy=b.y-player.y,d=dx*dx+dy*dy;if(d<m){m=d;n=b}}for(const fb of finalBosses){const dx=fb.x-player.x,dy=fb.y-player.y,d=dx*dx+dy*dy;if(d<m){m=d;n=fb}}return n}
         function spawnParticles(x,y,c,n,s=150,l=0.6,z=4){for(let i=0;i<n;i++){const a=Math.random()*6.28,sp=Math.random()*s+s*0.3;particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:Math.random()*l+l*0.5,maxLife:l*1.5,radius:Math.random()*z+1,color:c,glow:true})}}
         function spawnXpOrb(x,y,v=3){xpOrbs.push({x,y,value:v,radius:6,attracted:false,vx:(Math.random()-0.5)*60,vy:(Math.random()-0.5)*60})}
         function spawnDamageText(x,y,t,c='#fff'){damageTexts.push({x:x+(Math.random()-0.5)*20,y:y-10,text:t,color:c,life:0.8,maxLife:0.8,vy:-60})}
         function spawnLightningBolt(target){const pts=[],steps=12;for(let i=0;i<=steps;i++){const t=i/steps,j=(Math.random()-0.5)*40*(i<steps?1:0.3),px=-(target.y-player.y),py=(target.x-player.x),l=Math.sqrt(px*px+py*py)||1;pts.push({x:player.x+(target.x-player.x)*t+(px/l)*j,y:player.y+(target.y-player.y)*t+(py/l)*j})}lightningBolts.push({points:pts,life:0.25,maxLife:0.25,target});const dmg=30*player.damageMult;if(target.hp!==undefined)damageEnemy(target,dmg,true);spawnParticles(target.x,target.y,'#ffff00',10,120,0.4,3)}
         function spawnBomb(x,y,radius=120){bombs.push({x,y,radius,timer:1.5,maxTimer:1.5});snd(800,100,0.3,'square',0.1)}
-        function explodeBomb(b){spawnParticles(b.x,b.y,'#ff4400',40,300,0.8,8);spawnParticles(b.x,b.y,'#ffaa00',30,200,0.6,6);screenShake=Math.max(screenShake,10);for(const e of enemies){if(Math.sqrt((e.x-b.x)**2+(e.y-b.y)**2)<b.radius)damageEnemy(e,80*player.damageMult)}for(const bo of bosses){if(Math.sqrt((bo.x-b.x)**2+(bo.y-b.y)**2)<b.radius)damageEnemy(bo,100*player.damageMult)}bombSnd()}
+        function explodeBomb(b){spawnParticles(b.x,b.y,'#ff4400',40,300,0.8,8);spawnParticles(b.x,b.y,'#ffaa00',30,200,0.6,6);screenShake=Math.max(screenShake,10);for(const e of enemies){if(Math.sqrt((e.x-b.x)**2+(e.y-b.y)**2)<b.radius)damageEnemy(e,80*player.damageMult)}for(const bo of bosses){if(Math.sqrt((bo.x-b.x)**2+(bo.y-b.y)**2)<b.radius)damageEnemy(bo,100*player.damageMult)}for(const fb of finalBosses){if(Math.sqrt((fb.x-b.x)**2+(fb.y-b.y)**2)<b.radius)damageEnemy(fb,100*player.damageMult)}bombSnd()}
         function damageEnemy(e,d,crit=false){e.hp-=d;e.hitFlash=0.15;spawnDamageText(e.x,e.y,Math.round(d),crit?'#ffd700':'#fff');if(crit)spawnParticles(e.x,e.y,'#ffd700',3,80,0.3,3);if(e.hp<=0)killEnemy(e)}
-        function killEnemy(e){const i=enemies.indexOf(e);if(i>-1)enemies.splice(i,1);const bi=bosses.indexOf(e);if(bi>-1){bosses.splice(bi,1);bossesKilled++;document.getElementById('go-bosses').textContent=bossesKilled;document.getElementById('boss-bar-container').style.display='none';spawnParticles(e.x,e.y,e.glow,40,300,1,8);spawnXpOrb(e.x,e.y,50)}else{kills+=e.score;spawnParticles(e.x,e.y,e.glow,18,200,0.7,5);spawnXpOrb(e.x,e.y,e.xpValue||1);if(player.lifesteal>0){player.hp=Math.min(player.maxHp,player.hp+player.lifesteal);updateHealthUI()}}expSnd();updateKillUI()}
-        function damagePlayer(a){if(player.invincible>0)return;if(player.energyShield&&player.shieldCooldown<=0){player.shieldCooldown=5;return}a*=player.damageReduction||1;player.hp-=a;player.invincible=0.3;screenShake=Math.max(screenShake,6);spawnParticles(player.x,player.y,'#ff3b6b',12,180,0.5,4);if(player.hp<=0){player.hp=0;gameOver()}updateHealthUI()}
+        function killEnemy(e){const i=enemies.indexOf(e);if(i>-1)enemies.splice(i,1);const bi=bosses.indexOf(e);if(bi>-1){bosses.splice(bi,1);bossesKilled++;document.getElementById('go-bosses').textContent=bossesKilled;document.getElementById('boss-bar-container').style.display='none';spawnParticles(e.x,e.y,e.glow,40,300,1,8);spawnXpOrb(e.x,e.y,50)}else if(finalBosses.indexOf(e)>-1){const fi=finalBosses.indexOf(e);finalBosses.splice(fi,1);document.getElementById('final-boss-bar-container').style.display='none';spawnParticles(e.x,e.y,e.glow,80,500,1.5,10);spawnXpOrb(e.x,e.y,200)}else{kills+=e.score;spawnParticles(e.x,e.y,e.glow,18,200,0.7,5);spawnXpOrb(e.x,e.y,e.xpValue||1);if(player.lifesteal>0){player.hp=Math.min(player.maxHp,player.hp+player.lifesteal);updateHealthUI()}if(player.xpSteal>0){gainXP(player.xpSteal)}if(player.explosiveKills){spawnParticles(e.x,e.y,'#ff4400',20,200,0.4,4);for(const en of enemies){if(en!==e&&Math.sqrt((en.x-e.x)**2+(en.y-e.y)**2)<50)damageEnemy(en,30)}}}expSnd();updateKillUI()}
+        function damagePlayer(a){if(player.invincible>0)return;if(player.energyShield&&player.shieldCooldown<=0){player.shieldCooldown=5;return}if(player.reflectShield){for(const en of enemies){if(Math.sqrt((en.x-player.x)**2+(en.y-player.y)**2)<100)damageEnemy(en,a*0.3)}}a*=player.damageReduction||1;player.hp-=a;player.invincible=0.3;screenShake=Math.max(screenShake,6);spawnParticles(player.x,player.y,'#ff3b6b',12,180,0.5,4);if(player.hp<=0){player.hp=0;gameOver()}updateHealthUI()}
         function updateHealthUI(){const p=Math.max(0,(player.hp/player.maxHp)*100);document.getElementById('health-bar-fill').style.width=p+'%';document.getElementById('health-text').textContent=Math.ceil(player.hp)+' / '+player.maxHp}
         function updateXPUI(){const p=Math.min(100,(xp/xpToNext)*100);document.getElementById('xp-bar-fill').style.width=p+'%';document.getElementById('xp-text').textContent='XP: '+Math.floor(xp)+' / '+xpToNext}
         function updateKillUI(){document.getElementById('kill-num').textContent=kills}
@@ -228,8 +245,8 @@
         const keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key==='ArrowUp')keys['w']=true;if(e.key==='ArrowDown')keys['s']=true;if(e.key==='ArrowLeft')keys['a']=true;if(e.key==='ArrowRight')keys['d']=true});addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key==='ArrowUp')keys['w']=false;if(e.key==='ArrowDown')keys['s']=false;if(e.key==='ArrowLeft')keys['a']=false;if(e.key==='ArrowRight')keys['d']=false});
         let touchX=null,touchY=null;canvas.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];touchX=t.clientX;touchY=t.clientY});canvas.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];touchX=t.clientX;touchY=t.clientY});canvas.addEventListener('touchend',()=>{touchX=null;touchY=null});
         let mDown=false;canvas.addEventListener('mousedown',e=>{mDown=true;mouseX=e.clientX;mouseY=e.clientY;touchX=e.clientX;touchY=e.clientY});canvas.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;if(mDown){touchX=e.clientX;touchY=e.clientY}});canvas.addEventListener('mouseup',()=>{mDown=false;touchX=null;touchY=null});
-        window.startGame=function(){initAudio();document.getElementById('start-overlay').classList.add('hidden');gameRunning=true;gamePaused=false;gameTime=0;kills=0;level=1;xp=0;xpToNext=20;bossesKilled=0;resetPlayer();enemies=[];projectiles=[];particles=[];xpOrbs=[];damageTexts=[];lightningBolts=[];bosses=[];disasters=[];areaEffects=[];bombs=[];screenShake=0;updateHealthUI();updateXPUI();updateKillUI();updateLevelUI();updateTimerUI();updateBestRecordUI();document.getElementById('go-bosses').textContent='0';document.getElementById('game-over-overlay').classList.remove('active');document.getElementById('upgrade-overlay').classList.remove('active');document.getElementById('boss-bar-container').style.display='none'};window.restartGame=()=>window.startGame();
-        let enemySpawnTimer=0,bossSpawnTimer=45,disasterTimer=30;
+        window.startGame=function(){initAudio();document.getElementById('start-overlay').classList.add('hidden');gameRunning=true;gamePaused=false;gameTime=0;kills=0;level=1;xp=0;xpToNext=20;bossesKilled=0;resetPlayer();enemies=[];projectiles=[];particles=[];xpOrbs=[];damageTexts=[];lightningBolts=[];bosses=[];finalBosses=[];disasters=[];areaEffects=[];bombs=[];screenShake=0;updateHealthUI();updateXPUI();updateKillUI();updateLevelUI();updateTimerUI();updateBestRecordUI();document.getElementById('go-bosses').textContent='0';document.getElementById('game-over-overlay').classList.remove('active');document.getElementById('upgrade-overlay').classList.remove('active');document.getElementById('boss-bar-container').style.display='none';document.getElementById('final-boss-bar-container').style.display='none'};window.restartGame=()=>window.startGame();
+        let enemySpawnTimer=0,bossSpawnTimer=45,disasterTimer=30,finalBossTimer=300; // 5 menit
         function update(dt){if(!gameRunning||gamePaused)return;gameTime+=dt;updateTimerUI();if(player.shieldCooldown>0)player.shieldCooldown-=dt;
             if(player.slowTimer>0){player.slowTimer-=dt;if(player.slowTimer<=0){player.slowFactor=1;}}
             player.speedMult=player.baseSpeedMult*player.slowFactor;
@@ -238,8 +255,8 @@
             if(touchX!==null&&touchY!==null){const cx=touchX-W/2,cy=touchY-H/2,l=Math.sqrt(cx*cx+cy*cy);if(l>30){dx=cx/l;dy=cy/l}}
             if(dx!==0||dy!==0){const l=Math.sqrt(dx*dx+dy*dy);player.x+=dx/l*player.baseSpeed*player.speedMult*dt;player.y+=dy/l*player.baseSpeed*player.speedMult*dt}
             player.x=Math.max(player.radius,Math.min(worldSize-player.radius,player.x));player.y=Math.max(player.radius,Math.min(worldSize-player.radius,player.y));
-            const efr=player.baseFireRate*player.fireRateMult;player.fireCooldown-=dt;if(player.fireCooldown<=0&&(enemies.length>0||bosses.length>0)){fireProjectile();player.fireCooldown=1/efr}
-            if(player.lightningEnabled){player.lightningCooldown-=dt;if(player.lightningCooldown<=0){const targets=enemies.length>0?enemies:bosses;if(targets.length>0){const t=targets[Math.floor(Math.random()*targets.length)];spawnLightningBolt(t)}player.lightningCooldown=3}}
+            const efr=player.baseFireRate*player.fireRateMult;player.fireCooldown-=dt;if(player.fireCooldown<=0&&(enemies.length>0||bosses.length>0||finalBosses.length>0)){fireProjectile();player.fireCooldown=1/efr}
+            if(player.lightningEnabled){player.lightningCooldown-=dt;if(player.lightningCooldown<=0){const targets=enemies.length>0?enemies:bosses.length>0?bosses:finalBosses;if(targets.length>0){const t=targets[Math.floor(Math.random()*targets.length)];spawnLightningBolt(t);if(player.chainLightning){let extra=2;for(const e of enemies){if(e!==t&&extra>0&&Math.abs(e.x-t.x)<200){spawnLightningBolt(e);extra--}}}}player.lightningCooldown=3}}
             if(player.throwingKnives>0){player.throwingKnifeCooldown-=dt;if(player.throwingKnifeCooldown<=0){player.throwingKnifeCooldown=1;const target=findNearestEnemy();if(target){const angle=Math.atan2(target.y-player.y,target.x-player.x);for(let i=0;i<player.throwingKnives;i++){const spread=(i-(player.throwingKnives-1)/2)*0.2;const fa=angle+spread;projectiles.push({x:player.x,y:player.y,vx:Math.cos(fa)*600,vy:Math.sin(fa)*600,damage:25*player.damageMult,pierce:0,hitEnemies:new Set(),radius:7,color:'#c86bff',glow:'#c86bff',life:1.5,type:'knife'});}spawnParticles(player.x,player.y,'#c86bff',5,80,0.2,2);}}}
             if(player.tornadoEnabled){
                 if(!player.tornadoActive){
@@ -270,22 +287,10 @@
                                 }
                             }
                         }
-                        for(const b of bosses){
-                            const dx = b.x - player.tornadoX;
-                            const dy = b.y - player.tornadoY;
-                            const dist = Math.sqrt(dx*dx + dy*dy);
-                            if(dist < player.tornadoRadius * 0.7){
-                                damageEnemy(b, player.tornadoDamage * 0.5 * dt);
-                                if(dist > 10){
-                                    const pull = player.tornadoPull * 0.3 * dt;
-                                    b.x -= (dx/dist) * pull;
-                                    b.y -= (dy/dist) * pull;
-                                }
-                            }
-                        }
                     }
                 }
             }
+            if(player.poisonAura){for(const e of enemies){if(Math.sqrt((e.x-player.x)**2+(e.y-player.y)**2)<100){e.poisoned=2;e.poisonTimer=0.5}}}
             if(player.laserOrbital){player.laserCooldown-=dt;player.laserAngle+=dt*2.5;if(player.laserCooldown<=0){player.laserCooldown=3;const target=findNearestEnemy();if(target){const orbX=player.x+Math.cos(player.laserAngle)*80;const orbY=player.y+Math.sin(player.laserAngle)*80;const angle=Math.atan2(target.y-orbY,target.x-orbX);projectiles.push({x:orbX,y:orbY,vx:Math.cos(angle)*700,vy:Math.sin(angle)*700,damage:40*player.damageMult,pierce:5,hitEnemies:new Set(),radius:14,color:'#ff0000',glow:'#ff4444',life:1.5})}}}
             if(player.droneCount>0){player.droneCooldown-=dt;if(player.droneCooldown<=0){player.droneCooldown=player.droneFireRate;const target=findNearestEnemy();if(target){for(let i=0;i<player.droneCount;i++){const angleOffset=(i*2*Math.PI/player.droneCount);const dxp=player.x+Math.cos(angleOffset)*70;const dyp=player.y+Math.sin(angleOffset)*70;const angle=Math.atan2(target.y-dyp,target.x-dxp);projectiles.push({x:dxp,y:dyp,vx:Math.cos(angle)*450,vy:Math.sin(angle)*450,damage:15*player.damageMult,pierce:0,hitEnemies:new Set(),radius:4,color:'#00ff88',glow:'#00cc66',life:1.2})}}}}
             if(player.planeEnabled){player.planeCooldown-=dt;if(player.planeCooldown<=0){player.planeCooldown=8;const target=findNearestEnemy();if(target){spawnBomb(target.x,target.y,player.bombRadius);if(player.planeDoubleBomb){spawnBomb(target.x+80,target.y+80,player.bombRadius)}}}}
@@ -295,6 +300,7 @@
             enemySpawnTimer-=dt;if(enemySpawnTimer<=0){spawnEnemy();enemySpawnTimer=Math.max(0.3,1.0-gameTime*0.005)}
             bossSpawnTimer-=dt;if(bossSpawnTimer<=0){spawnBoss();bossSpawnTimer=45}
             disasterTimer-=dt;if(disasterTimer<=0){triggerDisaster();disasterTimer=25+Math.random()*15}
+            finalBossTimer-=dt;if(finalBossTimer<=0){spawnFinalBoss();finalBossTimer=300}
             for(let i=disasters.length-1;i>=0;i--){const d=disasters[i];d.timer-=dt;if(d.timer<=0){disasters.splice(i,1);continue}
                 if(d.type==='meteor'){d.interval-=dt;if(d.interval<=0){d.interval=0.5;const mx=player.x+(Math.random()-0.5)*800,my=player.y+(Math.random()-0.5)*800;spawnParticles(mx,my,'#ff6600',20,200,0.5,5);for(const e of enemies){if(Math.sqrt((e.x-mx)**2+(e.y-my)**2)<80)damageEnemy(e,50)}}}
                 if(d.type==='earthquake'){screenShake=Math.max(screenShake,12)}
@@ -302,7 +308,7 @@
                 if(d.type==='lightningstorm'){d.interval-=dt;if(d.interval<=0){d.interval=1;const lx=player.x+(Math.random()-0.5)*500,ly=player.y+(Math.random()-0.5)*500;spawnParticles(lx,ly,'#ffff00',15,150,0.4,4)}}
                 if(d.type==='tsunami'){d.waveX+=d.speed*dt;if(d.waveX>worldSize+500){disasters.splice(i,1);continue}if(player.x>d.waveX&&player.x<d.waveX+d.width){damagePlayer(30)}}
             }
-            for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];let sp=e.speed;if(e.slowed>0){sp*=0.7;e.slowTimer-=dt;if(e.slowTimer<=0)e.slowed=0}const dxp=player.x-e.x,dyp=player.y-e.y,dist=Math.sqrt(dxp*dxp+dyp*dyp);if(dist>0.5){e.x+=dxp/dist*sp*dt;e.y+=dyp/dist*sp*dt}if(dist<e.radius+player.radius){damagePlayer(e.damage);if(player.thornsDamage>0)damageEnemy(e,player.thornsDamage)}if(dist>2000)enemies.splice(i,1)}
+            for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];let sp=e.speed;if(e.slowed>0){sp*=0.7;e.slowTimer-=dt;if(e.slowTimer<=0)e.slowed=0}if(e.poisoned>0){e.poisonTimer-=dt;if(e.poisonTimer<=0){damageEnemy(e,player.poisonDamage);e.poisonTimer=1;e.poisoned-=dt}}const dxp=player.x-e.x,dyp=player.y-e.y,dist=Math.sqrt(dxp*dxp+dyp*dyp);if(dist>0.5){e.x+=dxp/dist*sp*dt;e.y+=dyp/dist*sp*dt}if(dist<e.radius+player.radius){damagePlayer(e.damage);if(player.thornsDamage>0)damageEnemy(e,player.thornsDamage)}if(dist>2000)enemies.splice(i,1)}
             for(let i=bosses.length-1;i>=0;i--){const b=bosses[i];const dxp=player.x-b.x,dyp=player.y-b.y,dist=Math.sqrt(dxp*dxp+dyp*dyp);if(dist>0.5){b.x+=dxp/dist*b.speed*dt;b.y+=dyp/dist*b.speed*dt}b.attackCooldown-=dt;b.skillCooldown-=dt;
                 if(b.skillCooldown<=0&&dist<400){b.skillCooldown=3;
                     if(b.type==='water'){for(let j=0;j<12;j++){const a=Math.atan2(player.y-b.y,player.x-b.x)+j*0.35-2.0;projectiles.push({x:b.x,y:b.y,vx:Math.cos(a)*300,vy:Math.sin(a)*300,damage:b.damage*0.6,pierce:0,hitEnemies:new Set(),radius:10,color:'#00aaff',glow:'#00ccff',life:1.5})}}
@@ -312,7 +318,9 @@
                     else if(b.type==='lightning'){for(let j=0;j<8;j++){const lx=b.x+(Math.random()-0.5)*350,ly=b.y+(Math.random()-0.5)*350;spawnParticles(lx,ly,'#ffff00',20,200,0.4,5)}}}
                 if(dist<b.radius+player.radius)damagePlayer(b.damage);if(bosses.length>0){document.getElementById('boss-bar-container').style.display='block';document.getElementById('boss-bar-fill').style.width=(b.hp/b.maxHp*100)+'%';document.getElementById('boss-name').textContent=b.element+' '+b.name}}
             if(bosses.length===0)document.getElementById('boss-bar-container').style.display='none';
-            for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let rem=p.life<=0;if(!rem){for(const e of enemies){if(p.hitEnemies.has(e))continue;if(Math.sqrt((e.x-p.x)**2+(e.y-p.y)**2)<e.radius+p.radius){const crit=Math.random()<player.critChance;damageEnemy(e,p.damage*(crit?2.5:1),crit);p.hitEnemies.add(e);if(p.pierce>0){p.pierce--;p.hitEnemies.delete(e)}else{rem=true;break}}}if(!rem)for(const b of bosses){if(p.hitEnemies.has(b))continue;if(Math.sqrt((b.x-p.x)**2+(b.y-p.y)**2)<b.radius+p.radius){damageEnemy(b,p.damage);p.hitEnemies.add(b);rem=true;break}}}if(rem)projectiles.splice(i,1)}
+            for(let i=finalBosses.length-1;i>=0;i--){const fb=finalBosses[i];const dxp=player.x-fb.x,dyp=player.y-fb.y,dist=Math.sqrt(dxp*dxp+dyp*dyp);if(dist>0.5){fb.x+=dxp/dist*fb.speed*dt;fb.y+=dyp/dist*fb.speed*dt}if(dist<fb.radius+player.radius)damagePlayer(fb.damage);if(finalBosses.length>0){document.getElementById('final-boss-bar-container').style.display='block';document.getElementById('final-boss-bar-fill').style.width=(fb.hp/fb.maxHp*100)+'%';document.getElementById('final-boss-name').textContent=fb.name}}
+            if(finalBosses.length===0)document.getElementById('final-boss-bar-container').style.display='none';
+            for(let i=projectiles.length-1;i>=0;i--){const p=projectiles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;let rem=p.life<=0;if(!rem){for(const e of enemies){if(p.hitEnemies.has(e))continue;if(Math.sqrt((e.x-p.x)**2+(e.y-p.y)**2)<e.radius+p.radius){const crit=Math.random()<player.critChance;damageEnemy(e,p.damage*(crit?2.5:1),crit);p.hitEnemies.add(e);if(p.pierce>0){p.pierce--;p.hitEnemies.delete(e)}else{rem=true;break}}}if(!rem)for(const b of bosses){if(p.hitEnemies.has(b))continue;if(Math.sqrt((b.x-p.x)**2+(b.y-p.y)**2)<b.radius+p.radius){damageEnemy(b,p.damage);p.hitEnemies.add(b);rem=true;break}}if(!rem)for(const fb of finalBosses){if(p.hitEnemies.has(fb))continue;if(Math.sqrt((fb.x-p.x)**2+(fb.y-p.y)**2)<fb.radius+p.radius){damageEnemy(fb,p.damage);p.hitEnemies.add(fb);rem=true;break}}}if(rem)projectiles.splice(i,1)}
             const mr=player.baseMagnet*player.magnetMult;for(let i=xpOrbs.length-1;i>=0;i--){const o=xpOrbs[i],dxp=player.x-o.x,dyp=player.y-o.y,dist=Math.sqrt(dxp*dxp+dyp*dyp);if(dist<mr){const pull=600*dt;o.x+=dxp/dist*pull;o.y+=dyp/dist*pull}else{o.x+=o.vx*dt;o.y+=o.vy*dt}if(dist<player.radius+o.radius+6){gainXP(o.value);xpOrbs.splice(i,1)}}
             for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;if(p.life<=0)particles.splice(i,1)}
             for(let i=damageTexts.length-1;i>=0;i--){damageTexts[i].y+=damageTexts[i].vy*dt;damageTexts[i].life-=dt;if(damageTexts[i].life<=0)damageTexts.splice(i,1)}
@@ -323,7 +331,17 @@
             const gs=100,stx=Math.floor(cx/gs)*gs,sty=Math.floor(cy/gs)*gs;ctx.strokeStyle='rgba(40,50,80,0.35)';ctx.lineWidth=1;
             for(let x=stx;x<cx+W+gs;x+=gs){ctx.beginPath();ctx.moveTo(x,cy-20);ctx.lineTo(x,cy+H+20);ctx.stroke()}for(let y=sty;y<cy+H+gs;y+=gs){ctx.beginPath();ctx.moveTo(cx-20,y);ctx.lineTo(cx+W+20,y);ctx.stroke()}
             for(const s of backgroundStars){s.twinkle+=0.03;ctx.fillStyle=`rgba(200,220,255,${s.a*(0.6+0.4*Math.sin(s.twinkle))})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.28);ctx.fill()}
-            // Render Tornado
+            // Tsunami visual (diperjelas)
+            for(const d of disasters){if(d.type==='tsunami'){
+                ctx.fillStyle='rgba(0,100,255,0.8)';
+                ctx.fillRect(d.waveX,0,d.width,worldSize);
+                ctx.fillStyle='rgba(255,255,255,0.9)';
+                ctx.fillRect(d.waveX,0,10,worldSize);
+                ctx.fillStyle='rgba(255,255,255,0.6)';
+                ctx.fillRect(d.waveX+10,0,20,worldSize);
+                ctx.fillStyle='rgba(0,50,200,0.5)';
+                ctx.fillRect(d.waveX-30,0,30,worldSize);
+            }}
             if(player.tornadoActive){
                 const tx=player.tornadoX, ty=player.tornadoY;
                 const grad = ctx.createRadialGradient(tx,ty,0,tx,ty,player.tornadoRadius);
@@ -351,6 +369,7 @@
             for(const o of xpOrbs){const g2=14+Math.sin(gameTime*5+o.x)*4;const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,g2);g.addColorStop(0,'rgba(0,255,136,0.8)');g.addColorStop(1,'rgba(0,200,100,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,g2,0,6.28);ctx.fill();ctx.fillStyle='#00ff88';ctx.beginPath();ctx.arc(o.x,o.y,o.radius,0,6.28);ctx.fill()}
             for(const e of enemies){ctx.fillStyle=e.hitFlash>0?'#fff':e.color;ctx.shadowColor=e.glow;ctx.shadowBlur=18;ctx.beginPath();ctx.arc(e.x,e.y,e.radius,0,6.28);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(e.x,e.y,e.radius,0,6.28);ctx.stroke()}
             for(const b of bosses){ctx.fillStyle=b.hitFlash>0?'#fff':b.color;ctx.shadowColor=b.glow;ctx.shadowBlur=30;ctx.beginPath();ctx.arc(b.x,b.y,b.radius,0,6.28);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=b.glow;ctx.lineWidth=4;ctx.beginPath();ctx.arc(b.x,b.y,b.radius+5,0,6.28);ctx.stroke();ctx.font='24px sans-serif';ctx.textAlign='center';ctx.fillText(b.element,b.x,b.y-b.radius-15)}
+            for(const fb of finalBosses){ctx.fillStyle=fb.hitFlash>0?'#fff':fb.color;ctx.shadowColor=fb.glow;ctx.shadowBlur=40;ctx.beginPath();ctx.arc(fb.x,fb.y,fb.radius,0,6.28);ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle=fb.glow;ctx.lineWidth=6;ctx.beginPath();ctx.arc(fb.x,fb.y,fb.radius+8,0,6.28);ctx.stroke();ctx.font='32px sans-serif';ctx.textAlign='center';ctx.fillText(fb.element,fb.x,fb.y-fb.radius-20)}
             for(const p of projectiles){ctx.fillStyle=p.type==='knife'?'#c86bff':'#fff';ctx.shadowColor=p.glow;ctx.shadowBlur=16;ctx.beginPath();ctx.arc(p.x,p.y,p.radius,0,6.28);ctx.fill();ctx.shadowBlur=0}
             for(const b of bombs){ctx.fillStyle='#333';ctx.shadowColor='#ff6600';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(b.x,b.y,12,0,6.28);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#ff0000';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText('💣',b.x,b.y+3)}
             if(player.droneCount>0){for(let i=0;i<player.droneCount;i++){const angleOffset=i*2*Math.PI/player.droneCount;const dxp=player.x+Math.cos(angleOffset)*70;const dyp=player.y+Math.sin(angleOffset)*70;ctx.fillStyle='#00ff88';ctx.shadowColor='#00ff88';ctx.shadowBlur=20;ctx.fillRect(dxp-8,dyp-6,16,12);ctx.fillStyle='#fff';ctx.fillRect(dxp-4,dyp-8,8,4);ctx.shadowBlur=0}}
@@ -363,8 +382,7 @@
             const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.45)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H)}
         let lastTime=0;function loop(ts){const dt=Math.min((ts-lastTime)/1000,0.05);lastTime=ts;if(gameRunning&&!gamePaused)update(dt);render();requestAnimationFrame(loop)}requestAnimationFrame(loop);
         updateHealthUI();updateXPUI();updateLevelUI();updateTimerUI();updateBestRecordUI();
-        console.log('✅ Kecepatan musuh fast diturunkan ke 90');
-        console.log('✅ Scaling kecepatan dikurangi (0.008 per detik)');
+        console.log('✅ Perubahan: tsunami jelas, skill baru, final boss tiap 5 menit, musuh diperlambat');
     })();
     </script>
 </body>
