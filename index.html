@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>⚡ SURVIVOR ULTRA - World Luas & Evolusi Tak Terbatas</title>
+    <title>⚡ SURVIVOR ULTRA - Pedang Transenden Evolusi</title>
     <style>
         :root {
             --bg: #0a0a12;
@@ -12,6 +12,7 @@
             --gold: #ffd700;
             --card-bg: rgba(18, 18, 35, 0.95);
             --card-border: rgba(0, 240, 255, 0.4);
+            --transcendent: #ff00ff;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -32,6 +33,27 @@
         #timer-display span { color:var(--primary); text-shadow:0 0 10px var(--primary); }
         #kill-counter { background:rgba(0,0,0,0.7); border:1px solid rgba(255,59,107,0.4); border-radius:30px; padding:10px 18px; font-size:15px; font-weight:700; color:var(--accent); letter-spacing:1px; backdrop-filter:blur(10px); display:flex; align-items:center; gap:6px; box-shadow:0 0 20px rgba(255,59,107,0.2); }
         #best-record { background:rgba(0,0,0,0.7); border:1px solid rgba(255,215,0,0.4); border-radius:30px; padding:10px 18px; font-size:13px; font-weight:700; color:var(--gold); letter-spacing:1px; backdrop-filter:blur(10px); box-shadow:0 0 20px rgba(255,215,0,0.2); }
+        #pause-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 15;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255,215,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #pause-btn:hover { background: rgba(255,215,0,0.2); }
         #health-bar-container { position:absolute; bottom:28px; left:50%; transform:translateX(-50%); width:min(500px,70vw); pointer-events:none; }
         #health-bar-bg { background:rgba(0,0,0,0.75); border-radius:20px; height:18px; overflow:hidden; border:2px solid rgba(255,255,255,0.2); backdrop-filter:blur(8px); box-shadow:0 4px 20px rgba(0,0,0,0.5); position:relative; }
         #health-bar-fill { height:100%; background:linear-gradient(90deg,#ff3b6b,#ff6b9d,#ff3b6b); border-radius:20px; transition:width 0.15s; box-shadow:0 0 18px rgba(255,59,107,0.7); position:relative; }
@@ -62,7 +84,7 @@
         .upgrade-card h3 { color:#fff; font-size:17px; font-weight:800; margin-bottom:6px; position:relative; z-index:1; }
         .upgrade-card p { color:#aaa; font-size:12px; position:relative; z-index:1; line-height:1.4; }
         .upgrade-card .rarity { position:absolute; top:10px; right:14px; font-size:10px; font-weight:700; letter-spacing:1px; z-index:1; text-transform:uppercase; }
-        .rarity-common{color:#aaa} .rarity-rare{color:#00c8ff} .rarity-epic{color:#c86bff} .rarity-legendary{color:var(--gold)} .rarity-mythic{color:#ff00ff;text-shadow:0 0 8px #ff00ff}
+        .rarity-common{color:#aaa} .rarity-rare{color:#00c8ff} .rarity-epic{color:#c86bff} .rarity-legendary{color:var(--gold)} .rarity-mythic{color:#ff00ff;text-shadow:0 0 8px #ff00ff} .rarity-transcendent{color:#fff;text-shadow:0 0 15px #ff00ff,0 0 30px #ff00ff}
         .milestone-card { border:3px solid var(--gold); box-shadow:0 0 30px rgba(255,215,0,0.9),0 0 60px rgba(255,0,255,0.4); animation:milestonePulse 1.2s infinite; }
         @keyframes milestonePulse { 0%{box-shadow:0 0 20px rgba(255,215,0,0.8)} 50%{box-shadow:0 0 40px rgba(255,215,0,1),0 0 80px rgba(255,0,255,0.6)} 100%{box-shadow:0 0 20px rgba(255,215,0,0.8)} }
         .milestone-badge { position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; font-size:10px; font-weight:900; letter-spacing:2px; padding:4px 12px; border-radius:20px; z-index:2; box-shadow:0 0 20px gold; }
@@ -109,6 +131,7 @@
                 <div id="kill-counter">💀 <span id="kill-num">0</span></div>
                 <div id="best-record">🏆 <span id="best-time">00:00</span> | 💀 <span id="best-kills">0</span></div>
             </div>
+            <button id="pause-btn" onclick="togglePause()">⏸️</button>
             <div id="disaster-alert"></div>
             <div id="boss-bar-container"><div id="boss-bar-bg"><div id="boss-bar-fill" style="width:100%"></div></div><div id="boss-name"></div></div>
             <div id="final-boss-bar-container"><div id="final-boss-bar-bg"><div id="final-boss-bar-fill" style="width:100%"></div></div><div id="final-boss-name"></div></div>
@@ -117,7 +140,7 @@
         </div>
         <div id="upgrade-overlay"><div id="upgrade-panel"></div></div>
         <div id="game-over-overlay"><div id="game-over-panel"><h1>GAME OVER</h1><div class="stats">⏱️ Bertahan: <span id="go-time">00:00</span><br>💀 Membunuh: <span id="go-kills">0</span><br>⭐ Level: <span id="go-level">1</span><br>👑 Bos: <span id="go-bosses">0</span></div><button id="restart-btn" onclick="restartGame()">MAIN LAGI</button></div></div>
-        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">🌪️ WORLD LUAS & EVOLUSI TANPA BATAS 🌪️</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 XP lebih banyak • ⚡ Bos naik 3 level • 🌊 Tsunami jelas<br>🌍 World 12000x12000</div></div></div>
+        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">🌪️ TORNADO & PEDANG TRANSENDEN 🌪️</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 EXP dinamis • ⚡ Bos naik 3 level • 🌊 Tsunami jelas<br>⏸️ Pause di kanan atas • ⚔️ Pedang Transenden (evolusi 3x)</div></div></div>
     </div>
     <script>
     // ==================== SETUP ====================
@@ -143,15 +166,17 @@
     function bombSnd() { snd(100, 50, 0.8, 'sawtooth', 0.15); }
     function tornadoSnd() { snd(200, 50, 0.6, 'sine', 0.1); }
     function finalBossSnd() { snd(50, 200, 0.5, 'sawtooth', 0.15); }
+    function transcendentSnd() { snd(100, 500, 0.5, 'sine', 0.15); }
+    function evoSnd() { snd(300, 1200, 0.5, 'sine', 0.08); snd(800, 2400, 0.3, 'sine', 0.08); }
 
     // ==================== STATE ====================
     let gameRunning = false, gamePaused = false, gameTime = 0, kills = 0, level = 1, xp = 0, xpToNext = 20;
     let screenShake = 0, mouseX = W/2, mouseY = H/2, bossesKilled = 0;
     let bestKills = parseInt(localStorage.getItem('survivor_best_kills') || '0');
     let bestTime = parseInt(localStorage.getItem('survivor_best_time') || '0');
-    const worldSize = 12000; // 🌍 WORLD LUAS
+    const worldSize = 12000;
     const milestoneLevels = [10,20,30,40,50,60,70,80,90,100];
-    let pendingUpgrades = 0; // Antrian kartu saat bos mati
+    let pendingUpgrades = 0;
 
     // ==================== UPGRADE POOL (bertumpuk) ====================
     const upgradePool = [
@@ -185,11 +210,33 @@
         {id:'xp_steal', name:'Pencuri XP', icon:'🤑', desc:'+1 XP per kill', rarity:'rare', apply:()=>{player.xpSteal = (player.xpSteal||0)+1}},
         {id:'attack_speed', name:'Kecepatan Serangan', icon:'⚡', desc:'+25% attack speed', rarity:'epic', apply:()=>{player.fireRateMult *= 1.25}},
         {id:'explosive_kills', name:'Ledakan Tiap Kill', icon:'💥', desc:'Ledakan lebih besar', rarity:'legendary', apply:()=>{player.explosiveKills = true; player.explosionRadius = (player.explosionRadius||50)+20}},
+        // ========== SKILL TRANSCENDENT ==========
+        {id:'transcendent_sword', name:'Pedang Transenden', icon:'⚔️', desc:'Pedang raksasa AOE setiap 15 detik. Evolusi 3x: radius 1 layar', rarity:'transcendent', apply:()=>{
+            player.transcendentSword = true;
+            player.transcendentCooldown = 0;
+            const currentCount = player.upgradeCounts['transcendent_sword'] || 0;
+            if (currentCount >= 2 && !player.transcendentSwordEvolved) {
+                // EVOLUSI: radius 1 layar
+                player.transcendentSwordEvolved = true;
+                player.transcendentSwordRadius = Math.max(window.innerWidth, window.innerHeight);
+                player.transcendentSwordDamage = 400;
+                const alert = document.getElementById('disaster-alert');
+                alert.textContent = '✨ EVOLUSI PEDANG TRANSENDEN! ✨';
+                alert.style.color = '#ffd700';
+                alert.style.display = 'block';
+                setTimeout(() => alert.style.display = 'none', 3000);
+                evoSnd();
+            } else {
+                player.transcendentSwordRadius = player.transcendentSwordRadius || 300;
+                player.transcendentSwordDamage = player.transcendentSwordDamage || 200;
+            }
+        }},
     ];
 
     function getRandomUpgrades(level) {
         let pool = upgradePool.filter(u => !u.milestoneOnly);
-        if (milestoneLevels.includes(level)) pool = upgradePool.filter(u => u.rarity === 'legendary' || u.rarity === 'epic' || u.rarity === 'mythic');
+        if (level >= 100) pool = pool.filter(u => u.rarity !== 'common');
+        if (milestoneLevels.includes(level)) pool = upgradePool.filter(u => u.rarity === 'legendary' || u.rarity === 'epic' || u.rarity === 'mythic' || u.rarity === 'transcendent');
         return [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
     }
 
@@ -209,7 +256,11 @@
         planeEnabled: false, planeCooldown: 0, planeDoubleBomb: false,
         bombEnabled: false, bombCooldown: 0, bombRadius: 120, bombDouble: false,
         tornadoEnabled: false, tornadoCooldown: 0, tornadoActive: false, tornadoTimer: 0,
-        tornadoX: 0, tornadoY: 0, tornadoRadius: 150, tornadoDamage: 20, tornadoPull: 100, tornadoDuration: 5
+        tornadoX: 0, tornadoY: 0, tornadoRadius: 150, tornadoDamage: 20, tornadoPull: 100, tornadoDuration: 5,
+        // Transendent
+        transcendentSword: false, transcendentCooldown: 0, transcendentSwordActive: false, transcendentSwordTimer: 0,
+        transcendentSwordX: 0, transcendentSwordY: 0, transcendentSwordRadius: 300, transcendentSwordDamage: 200,
+        transcendentSwordEvolved: false
     };
 
     function resetPlayer() {
@@ -229,7 +280,10 @@
             planeEnabled: false, planeCooldown: 0, planeDoubleBomb: false,
             bombEnabled: false, bombCooldown: 0, bombRadius: 120, bombDouble: false,
             tornadoEnabled: false, tornadoCooldown: 0, tornadoActive: false, tornadoTimer: 0,
-            tornadoX: 0, tornadoY: 0, tornadoRadius: 150, tornadoDamage: 20, tornadoPull: 100, tornadoDuration: 5
+            tornadoX: 0, tornadoY: 0, tornadoRadius: 150, tornadoDamage: 20, tornadoPull: 100, tornadoDuration: 5,
+            transcendentSword: false, transcendentCooldown: 0, transcendentSwordActive: false, transcendentSwordTimer: 0,
+            transcendentSwordX: 0, transcendentSwordY: 0, transcendentSwordRadius: 300, transcendentSwordDamage: 200,
+            transcendentSwordEvolved: false
         });
     }
 
@@ -257,7 +311,7 @@
     ];
     const finalBossBase = { hp:2000, speed:40, radius:60, damage:30, color:'#4b0082', glow:'#ff00ff', name:'RAJA KEGELAPAN', element:'👿' };
 
-    // ==================== FUNGSI GAME ====================
+    // ==================== GAME FUNCTIONS ====================
     function spawnFinalBoss() {
         if (!gameRunning || gamePaused) return;
         const scale = 1 + Math.floor(gameTime/300) * 0.5;
@@ -292,8 +346,30 @@
         x = Math.max(50, Math.min(worldSize - 50, x)); y = Math.max(50, Math.min(worldSize - 50, y));
         const r = Math.random(); let ti = 0, c = 0;
         for (let i = 0; i < enemyTypes.length; i++) { c += [0.45,0.25,0.18,0.12][i]; if (r < c) { ti = i; break; } }
-        const t = enemyTypes[ti], hpM = 1 + gameTime * 0.08;
-        enemies.push({ x, y, hp: t.hp * hpM, maxHp: t.hp * hpM, radius: t.radius * (1 + Math.min(gameTime * 0.01, 0.5)), speed: t.speed * (1 + gameTime * 0.005), color: t.color, glow: t.glow, score: t.score, xpValue: t.xpValue, damage: t.damage, type: t.type, hitFlash: 0, wobble: Math.random() * 6.28, slowed: 0, slowTimer: 0, poisoned: 0, poisonTimer: 0 });
+        const t = enemyTypes[ti];
+        const hpM = 1 + gameTime * 0.08; // Faktor skala HP
+        const speedM = 1 + gameTime * 0.005;
+        const xpMultiplier = 1 + hpM * 0.5; // EXP naik lebih cepat seiring HP
+        const baseXp = t.xpValue;
+        enemies.push({
+            x, y,
+            hp: t.hp * hpM,
+            maxHp: t.hp * hpM,
+            radius: t.radius * (1 + Math.min(gameTime * 0.01, 0.5)),
+            speed: t.speed * speedM,
+            color: t.color,
+            glow: t.glow,
+            score: t.score,
+            xpValue: Math.floor(baseXp * xpMultiplier),
+            damage: t.damage,
+            type: t.type,
+            hitFlash: 0,
+            wobble: Math.random() * 6.28,
+            slowed: 0,
+            slowTimer: 0,
+            poisoned: 0,
+            poisonTimer: 0
+        });
     }
     function fireProjectile() {
         const target = findNearestEnemy(); if (!target) return;
@@ -423,7 +499,12 @@
         updateBestRecordUI();
     }
 
-    // Input
+    function togglePause() {
+        if (!gameRunning) return;
+        gamePaused = !gamePaused;
+        document.getElementById('pause-btn').textContent = gamePaused ? '▶️' : '⏸️';
+    }
+
     const keys = {}; addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key === 'ArrowUp') keys['w'] = true; if (e.key === 'ArrowDown') keys['s'] = true; if (e.key === 'ArrowLeft') keys['a'] = true; if (e.key === 'ArrowRight') keys['d'] = true; });
     addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; if (e.key === 'ArrowUp') keys['w'] = false; if (e.key === 'ArrowDown') keys['s'] = false; if (e.key === 'ArrowLeft') keys['a'] = false; if (e.key === 'ArrowRight') keys['d'] = false; });
     let touchX = null, touchY = null; canvas.addEventListener('touchstart', e => { e.preventDefault(); const t = e.touches[0]; touchX = t.clientX; touchY = t.clientY; });
@@ -438,6 +519,7 @@
         updateHealthUI(); updateXPUI(); updateKillUI(); updateLevelUI(); updateTimerUI(); updateBestRecordUI();
         document.getElementById('go-bosses').textContent = '0'; document.getElementById('game-over-overlay').classList.remove('active'); document.getElementById('upgrade-overlay').classList.remove('active');
         document.getElementById('boss-bar-container').style.display = 'none'; document.getElementById('final-boss-bar-container').style.display = 'none';
+        document.getElementById('pause-btn').textContent = '⏸️';
     };
     window.restartGame = () => window.startGame();
 
@@ -461,6 +543,34 @@
         if (player.tornadoEnabled) {
             if (!player.tornadoActive) { player.tornadoCooldown -= dt; if (player.tornadoCooldown <= 0) { player.tornadoActive = true; player.tornadoTimer = player.tornadoDuration; player.tornadoX = player.x; player.tornadoY = player.y; player.tornadoCooldown = 15; tornadoSnd(); } }
             else { player.tornadoTimer -= dt; if (player.tornadoTimer <= 0) player.tornadoActive = false; else { for (const e of enemies) { const dx = e.x - player.tornadoX, dy = e.y - player.tornadoY, dist = Math.sqrt(dx * dx + dy * dy); if (dist < player.tornadoRadius) { damageEnemy(e, player.tornadoDamage * dt); if (dist > 5) { const pull = player.tornadoPull * dt * (1 - dist / player.tornadoRadius); e.x -= (dx / dist) * pull; e.y -= (dy / dist) * pull; } } } } }
+        }
+        // Transcendent Sword
+        if (player.transcendentSword) {
+            if (!player.transcendentSwordActive) {
+                player.transcendentCooldown -= dt;
+                if (player.transcendentCooldown <= 0) {
+                    player.transcendentSwordActive = true;
+                    player.transcendentSwordTimer = 1;
+                    const target = findNearestEnemy();
+                    if (target) { player.transcendentSwordX = target.x; player.transcendentSwordY = target.y; }
+                    else { player.transcendentSwordX = player.x; player.transcendentSwordY = player.y; }
+                    player.transcendentCooldown = 15;
+                    transcendentSnd();
+                }
+            } else {
+                player.transcendentSwordTimer -= dt;
+                if (player.transcendentSwordTimer <= 0) {
+                    player.transcendentSwordActive = false;
+                    const sx = player.transcendentSwordX, sy = player.transcendentSwordY;
+                    const radius = player.transcendentSwordRadius;
+                    const damage = player.transcendentSwordDamage * player.damageMult;
+                    for (const e of enemies) if (Math.sqrt((e.x - sx) ** 2 + (e.y - sy) ** 2) < radius) damageEnemy(e, damage);
+                    for (const b of bosses) if (Math.sqrt((b.x - sx) ** 2 + (b.y - sy) ** 2) < radius) damageEnemy(b, damage * 0.7);
+                    for (const fb of finalBosses) if (Math.sqrt((fb.x - sx) ** 2 + (fb.y - sy) ** 2) < radius) damageEnemy(fb, damage * 0.7);
+                    spawnParticles(sx, sy, '#ffd700', 50, 300, 0.8, 8);
+                    screenShake = Math.max(screenShake, 15);
+                }
+            }
         }
         if (player.poisonAura) for (const e of enemies) if (Math.sqrt((e.x - player.x) ** 2 + (e.y - player.y) ** 2) < player.poisonAuraRadius) { e.poisoned = 2; e.poisonTimer = 0.5; }
         if (player.laserOrbital) { player.laserCooldown -= dt; player.laserAngle += dt * 2.5; if (player.laserCooldown <= 0) { player.laserCooldown = 3; const target = findNearestEnemy(); if (target) { const orbX = player.x + Math.cos(player.laserAngle) * 80, orbY = player.y + Math.sin(player.laserAngle) * 80; const angle = Math.atan2(target.y - orbY, target.x - orbX); projectiles.push({ x: orbX, y: orbY, vx: Math.cos(angle) * 700, vy: Math.sin(angle) * 700, damage: 40 * player.damageMult, pierce: 5, hitEnemies: new Set(), radius: 14, color: '#ff0000', glow: '#ff4444', life: 1.5 }); } } }
@@ -509,6 +619,31 @@
         for (const s of backgroundStars) { s.twinkle += 0.03; ctx.fillStyle = `rgba(200,220,255,${s.a * (0.6 + 0.4 * Math.sin(s.twinkle))})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.28); ctx.fill(); }
         for (const d of disasters) if (d.type === 'tsunami') { const grad = ctx.createLinearGradient(d.waveX, 0, d.waveX + d.width, 0); grad.addColorStop(0, 'rgba(0,100,255,0.8)'); grad.addColorStop(1, 'rgba(0,50,200,0.4)'); ctx.fillStyle = grad; ctx.fillRect(d.waveX, 0, d.width, worldSize); ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(d.waveX, 0, 15, worldSize); ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillRect(d.waveX + 15, 0, 10, worldSize); ctx.fillStyle = 'rgba(0,50,200,0.6)'; ctx.fillRect(d.waveX + d.width - 20, 0, 20, worldSize); }
         if (player.tornadoActive) { const tx = player.tornadoX, ty = player.tornadoY; const grad = ctx.createRadialGradient(tx, ty, 0, tx, ty, player.tornadoRadius); grad.addColorStop(0, 'rgba(200,200,200,0.1)'); grad.addColorStop(0.5, 'rgba(255,255,255,0.25)'); grad.addColorStop(1, 'rgba(200,200,200,0)'); ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(tx, ty, player.tornadoRadius, 0, 6.28); ctx.fill(); for (let i = 0; i < 3; i++) { ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2; ctx.beginPath(); for (let a = 0; a < Math.PI * 2; a += 0.1) { const r = player.tornadoRadius * (0.3 + 0.2 * Math.sin(a * 3 + gameTime * 5 + i)); const x = tx + Math.cos(a + gameTime * 2 + i) * r; const y = ty + Math.sin(a + gameTime * 2 + i) * r; if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.stroke(); } }
+        // Transcendent Sword Visual
+        if (player.transcendentSwordActive) {
+            const sx = player.transcendentSwordX, sy = player.transcendentSwordY;
+            const timeRatio = player.transcendentSwordTimer / 1;
+            const offsetY = (1 - timeRatio) * 200;
+            ctx.fillStyle = player.transcendentSwordEvolved ? '#ffffff' : '#ffd700';
+            ctx.shadowColor = player.transcendentSwordEvolved ? '#00ffff' : '#ff00ff';
+            ctx.shadowBlur = 40;
+            ctx.beginPath();
+            ctx.moveTo(sx - 20, sy - 200 + offsetY);
+            ctx.lineTo(sx + 20, sy - 200 + offsetY);
+            ctx.lineTo(sx + 10, sy - 100 + offsetY);
+            ctx.lineTo(sx, sy - 20 + offsetY);
+            ctx.lineTo(sx - 10, sy - 100 + offsetY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(sx - 8, sy - 240 + offsetY, 16, 40);
+            ctx.strokeStyle = player.transcendentSwordEvolved ? 'rgba(0,255,255,0.9)' : 'rgba(255,215,0,0.8)';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(sx, sy, player.transcendentSwordRadius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
         for (const o of xpOrbs) { const g2 = 14 + Math.sin(gameTime * 5 + o.x) * 4; const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, g2); g.addColorStop(0, 'rgba(0,255,136,0.8)'); g.addColorStop(1, 'rgba(0,200,100,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(o.x, o.y, g2, 0, 6.28); ctx.fill(); ctx.fillStyle = '#00ff88'; ctx.beginPath(); ctx.arc(o.x, o.y, o.radius, 0, 6.28); ctx.fill(); }
         for (const e of enemies) { ctx.fillStyle = e.hitFlash > 0 ? '#fff' : e.color; ctx.shadowColor = e.glow; ctx.shadowBlur = 18; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, 6.28); ctx.stroke(); }
         for (const b of bosses) { ctx.fillStyle = b.hitFlash > 0 ? '#fff' : b.color; ctx.shadowColor = b.glow; ctx.shadowBlur = 30; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = b.glow; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius + 5, 0, 6.28); ctx.stroke(); ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(b.element, b.x, b.y - b.radius - 15); }
@@ -528,7 +663,7 @@
     let lastTime = 0; function gameLoop(ts) { const dt = Math.min((ts - lastTime) / 1000, 0.05); lastTime = ts; if (gameRunning && !gamePaused) update(dt); render(); requestAnimationFrame(gameLoop); }
     requestAnimationFrame(gameLoop);
     updateHealthUI(); updateXPUI(); updateLevelUI(); updateTimerUI(); updateBestRecordUI();
-    console.log('✅ Game siap: world 12000x12000, evolusi tanpa batas, bos +3 level');
+    console.log('✅ Game siap: Pedang Transenden (evolusi 3x radius 1 layar), pause, EXP dinamis');
     </script>
 </body>
 </html>
