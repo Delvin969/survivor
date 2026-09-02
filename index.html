@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>⚡ SURVIVOR ULTRA - Final Boss & Skill</title>
+    <title>⚡ SURVIVOR ULTRA - Tsunami Jelas</title>
     <style>
         :root {
             --bg: #0a0a12;
@@ -118,7 +118,7 @@
         </div>
         <div id="upgrade-overlay"><div id="upgrade-panel"></div></div>
         <div id="game-over-overlay"><div id="game-over-panel"><h1>GAME OVER</h1><div class="stats">⏱️ Bertahan: <span id="go-time">00:00</span><br>💀 Membunuh: <span id="go-kills">0</span><br>⭐ Level: <span id="go-level">1</span><br>👑 Bos: <span id="go-bosses">0</span></div><button id="restart-btn" onclick="restartGame()">MAIN LAGI</button></div></div>
-        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">🌪️ TORNADO & FINAL BOSS 🌪️</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 XP berbeda per musuh • ⚡ Bos tiap 45 detik • 🌊 Tsunami jelas</div></div></div>
+        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">🌊 TSUNAMI JELAS 🌊</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 XP berbeda per musuh • ⚡ Bos tiap 45 detik • 🌊 Tsunami terlihat</div></div></div>
     </div>
     <script>
     (function(){
@@ -169,7 +169,6 @@
                 {count:10,desc:'Evolusi II: Tornado Raksasa',apply:()=>{player.tornadoRadius*=1.5;player.tornadoDamage*=1.5;player.tornadoDuration+=2}},
                 {count:15,desc:'Evolusi III: Badai Super',apply:()=>{player.tornadoPull=400;player.tornadoDamage*=2;player.tornadoCooldown=Math.min(player.tornadoCooldown,8)}}
             ]},
-            // Skill baru tambahan
             {id:'chain_lightning',name:'Petir Berantai',icon:'⚡',desc:'Petir melompat ke 3 musuh',rarity:'legendary',apply:()=>{player.chainLightning=true}},
             {id:'poison_aura',name:'Aura Racun',icon:'☠️',desc:'Musuh di dekatmu terkena racun',rarity:'legendary',apply:()=>{player.poisonAura=true}},
             {id:'reflect_shield',name:'Perisai Reflektif',icon:'🔰',desc:'30% damage dipantulkan',rarity:'legendary',apply:()=>{player.reflectShield=true}},
@@ -196,9 +195,8 @@
             {type:'nature',name:'RAJA ALAM',hp:550,speed:48,radius:42,color:'#228b22',glow:'#32cd32',damage:20,element:'🌿',skill:'Memanggil akar & musuh'},
             {type:'lightning',name:'RAJA PETIR',hp:400,speed:70,radius:35,color:'#ffcc00',glow:'#ffff00',damage:24,element:'⚡',skill:'Sambaran petir cepat'},
         ];
-        // Final Boss definition
         const finalBossBase = {hp:2000, speed:40, radius:60, damage:30, color:'#4b0082', glow:'#ff00ff', name:'RAJA KEGELAPAN', element:'👿'};
-        function spawnFinalBoss(){if(!gameRunning||gamePaused)return;const scale = 1 + Math.floor(gameTime/300)*0.5; // makin kuat tiap 5 menit
+        function spawnFinalBoss(){if(!gameRunning||gamePaused)return;const scale = 1 + Math.floor(gameTime/300)*0.5;
             finalBosses.push({...finalBossBase, hp:finalBossBase.hp*scale, maxHp:finalBossBase.hp*scale, speed:finalBossBase.speed*(1+scale*0.2), damage:finalBossBase.damage*scale, x:player.x+400, y:player.y+400});
             const alert=document.getElementById('disaster-alert');alert.textContent='👿 RAJA KEGELAPAN MUNCUL!';alert.style.color='#ff00ff';alert.style.display='block';setTimeout(()=>{alert.style.display='none'},3000);finalBossSnd();}
         function spawnBoss(){if(!gameRunning||gamePaused)return;const type=bossTypes[Math.floor(Math.random()*bossTypes.length)];const angle=Math.random()*Math.PI*2;const dist=600;let x=player.x+Math.cos(angle)*dist,y=player.y+Math.sin(angle)*dist;x=Math.max(100,Math.min(worldSize-100,x));y=Math.max(100,Math.min(worldSize-100,y));const hpScale=1+gameTime*0.05;bosses.push({x,y,hp:type.hp*hpScale,maxHp:type.hp*hpScale,radius:type.radius,speed:type.speed,color:type.color,glow:type.glow,damage:type.damage,name:type.name,element:type.element,type:type.type,hitFlash:0,wobble:Math.random()*6.28,attackCooldown:2,skillCooldown:3});const alert=document.getElementById('disaster-alert');alert.textContent=type.element+' '+type.name+' MUNCUL!';alert.style.color=type.glow;alert.style.display='block';setTimeout(()=>{alert.style.display='none'},3000)}
@@ -207,7 +205,12 @@
             else if(type==='earthquake'){alert.textContent='🌋 GEMPA BUMI!';alert.style.color='#b8860b';screenShake=15;disasters.push({type:'earthquake',timer:6})}
             else if(type==='blizzard'){alert.textContent='❄️ BADAI SALJU!';alert.style.color='#add8e6';disasters.push({type:'blizzard',timer:10})}
             else if(type==='lightningstorm'){alert.textContent='⚡ BADAI PETIR!';alert.style.color='#ffff00';disasters.push({type:'lightningstorm',timer:8,interval:1})}
-            else if(type==='tsunami'){alert.textContent='🌊 TSUNAMI DATANG!';alert.style.color='#00aaff';disasters.push({type:'tsunami',timer:12,waveX:0,speed:250,width:300})}
+            else if(type==='tsunami'){
+                alert.textContent='🌊 TSUNAMI DATANG!';alert.style.color='#00aaff';
+                // Tsunami dimulai dari kiri pemain, lebih dekat agar terlihat
+                const startX = player.x - 600;
+                disasters.push({type:'tsunami',timer:12,waveX:startX,speed:150,width:400,damage:15,hitPlayer:false});
+            }
             setTimeout(()=>{alert.style.display='none'},2000)}
         function spawnEnemy(){if(!gameRunning||gamePaused)return;const angle=Math.random()*Math.PI*2;const dist=500+Math.random()*400;let x=player.x+Math.cos(angle)*dist,y=player.y+Math.sin(angle)*dist;x=Math.max(50,Math.min(worldSize-50,x));y=Math.max(50,Math.min(worldSize-50,y));const r=Math.random();let ti=0,c=0;for(let i=0;i<enemyTypes.length;i++){c+=[0.45,0.25,0.18,0.12][i];if(r<c){ti=i;break}}const t=enemyTypes[ti];const hpM=1+gameTime*0.08;enemies.push({x,y,hp:t.hp*hpM,maxHp:t.hp*hpM,radius:t.radius*(1+Math.min(gameTime*0.01,0.5)),speed:t.speed*(1+gameTime*0.005),color:t.color,glow:t.glow,score:t.score,xpValue:t.xpValue,damage:t.damage,type:t.type,hitFlash:0,wobble:Math.random()*6.28,slowed:0,slowTimer:0,poisoned:0,poisonTimer:0})}
         function fireProjectile(){const target=findNearestEnemy();if(!target)return;const angle=Math.atan2(target.y-player.y,target.x-player.x);const count=player.projectileCount;for(let i=0;i<count;i++){const off=(i-(count-1)/2)*0.12;const fa=angle+off;projectiles.push({x:player.x,y:player.y,vx:Math.cos(fa)*520,vy:Math.sin(fa)*520,damage:10*player.damageMult,pierce:player.pierce,hitEnemies:new Set(),radius:5,color:'#00f0ff',glow:'#00aaff',life:1.8})}
@@ -246,7 +249,7 @@
         let touchX=null,touchY=null;canvas.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];touchX=t.clientX;touchY=t.clientY});canvas.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];touchX=t.clientX;touchY=t.clientY});canvas.addEventListener('touchend',()=>{touchX=null;touchY=null});
         let mDown=false;canvas.addEventListener('mousedown',e=>{mDown=true;mouseX=e.clientX;mouseY=e.clientY;touchX=e.clientX;touchY=e.clientY});canvas.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;if(mDown){touchX=e.clientX;touchY=e.clientY}});canvas.addEventListener('mouseup',()=>{mDown=false;touchX=null;touchY=null});
         window.startGame=function(){initAudio();document.getElementById('start-overlay').classList.add('hidden');gameRunning=true;gamePaused=false;gameTime=0;kills=0;level=1;xp=0;xpToNext=20;bossesKilled=0;resetPlayer();enemies=[];projectiles=[];particles=[];xpOrbs=[];damageTexts=[];lightningBolts=[];bosses=[];finalBosses=[];disasters=[];areaEffects=[];bombs=[];screenShake=0;updateHealthUI();updateXPUI();updateKillUI();updateLevelUI();updateTimerUI();updateBestRecordUI();document.getElementById('go-bosses').textContent='0';document.getElementById('game-over-overlay').classList.remove('active');document.getElementById('upgrade-overlay').classList.remove('active');document.getElementById('boss-bar-container').style.display='none';document.getElementById('final-boss-bar-container').style.display='none'};window.restartGame=()=>window.startGame();
-        let enemySpawnTimer=0,bossSpawnTimer=45,disasterTimer=30,finalBossTimer=300; // 5 menit
+        let enemySpawnTimer=0,bossSpawnTimer=45,disasterTimer=30,finalBossTimer=300;
         function update(dt){if(!gameRunning||gamePaused)return;gameTime+=dt;updateTimerUI();if(player.shieldCooldown>0)player.shieldCooldown-=dt;
             if(player.slowTimer>0){player.slowTimer-=dt;if(player.slowTimer<=0){player.slowFactor=1;}}
             player.speedMult=player.baseSpeedMult*player.slowFactor;
@@ -306,7 +309,15 @@
                 if(d.type==='earthquake'){screenShake=Math.max(screenShake,12)}
                 if(d.type==='blizzard'){player.slowTimer=0.5;player.slowFactor=0.98;if(Math.random()<0.3)spawnParticles(player.x+(Math.random()-0.5)*600,player.y+(Math.random()-0.5)*600,'#add8e6',5,60,0.6,2)}
                 if(d.type==='lightningstorm'){d.interval-=dt;if(d.interval<=0){d.interval=1;const lx=player.x+(Math.random()-0.5)*500,ly=player.y+(Math.random()-0.5)*500;spawnParticles(lx,ly,'#ffff00',15,150,0.4,4)}}
-                if(d.type==='tsunami'){d.waveX+=d.speed*dt;if(d.waveX>worldSize+500){disasters.splice(i,1);continue}if(player.x>d.waveX&&player.x<d.waveX+d.width){damagePlayer(30)}}
+                if(d.type==='tsunami'){
+                    d.waveX += d.speed * dt;
+                    if(d.waveX > worldSize + 500){disasters.splice(i,1);continue}
+                    // Damage hanya sekali
+                    if(!d.hitPlayer && player.x > d.waveX && player.x < d.waveX + d.width){
+                        damagePlayer(d.damage);
+                        d.hitPlayer = true;
+                    }
+                }
             }
             for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];let sp=e.speed;if(e.slowed>0){sp*=0.7;e.slowTimer-=dt;if(e.slowTimer<=0)e.slowed=0}if(e.poisoned>0){e.poisonTimer-=dt;if(e.poisonTimer<=0){damageEnemy(e,player.poisonDamage);e.poisonTimer=1;e.poisoned-=dt}}const dxp=player.x-e.x,dyp=player.y-e.y,dist=Math.sqrt(dxp*dxp+dyp*dyp);if(dist>0.5){e.x+=dxp/dist*sp*dt;e.y+=dyp/dist*sp*dt}if(dist<e.radius+player.radius){damagePlayer(e.damage);if(player.thornsDamage>0)damageEnemy(e,player.thornsDamage)}if(dist>2000)enemies.splice(i,1)}
             for(let i=bosses.length-1;i>=0;i--){const b=bosses[i];const dxp=player.x-b.x,dyp=player.y-b.y,dist=Math.sqrt(dxp*dxp+dyp*dyp);if(dist>0.5){b.x+=dxp/dist*b.speed*dt;b.y+=dyp/dist*b.speed*dt}b.attackCooldown-=dt;b.skillCooldown-=dt;
@@ -331,17 +342,25 @@
             const gs=100,stx=Math.floor(cx/gs)*gs,sty=Math.floor(cy/gs)*gs;ctx.strokeStyle='rgba(40,50,80,0.35)';ctx.lineWidth=1;
             for(let x=stx;x<cx+W+gs;x+=gs){ctx.beginPath();ctx.moveTo(x,cy-20);ctx.lineTo(x,cy+H+20);ctx.stroke()}for(let y=sty;y<cy+H+gs;y+=gs){ctx.beginPath();ctx.moveTo(cx-20,y);ctx.lineTo(cx+W+20,y);ctx.stroke()}
             for(const s of backgroundStars){s.twinkle+=0.03;ctx.fillStyle=`rgba(200,220,255,${s.a*(0.6+0.4*Math.sin(s.twinkle))})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.28);ctx.fill()}
-            // Tsunami visual (diperjelas)
-            for(const d of disasters){if(d.type==='tsunami'){
-                ctx.fillStyle='rgba(0,100,255,0.8)';
-                ctx.fillRect(d.waveX,0,d.width,worldSize);
-                ctx.fillStyle='rgba(255,255,255,0.9)';
-                ctx.fillRect(d.waveX,0,10,worldSize);
-                ctx.fillStyle='rgba(255,255,255,0.6)';
-                ctx.fillRect(d.waveX+10,0,20,worldSize);
-                ctx.fillStyle='rgba(0,50,200,0.5)';
-                ctx.fillRect(d.waveX-30,0,30,worldSize);
-            }}
+            // Tsunami visual jelas
+            for(const d of disasters){
+                if(d.type==='tsunami'){
+                    // Gambar gradasi
+                    const grad = ctx.createLinearGradient(d.waveX,0,d.waveX+d.width,0);
+                    grad.addColorStop(0,'rgba(0,100,255,0.8)');
+                    grad.addColorStop(1,'rgba(0,50,200,0.4)');
+                    ctx.fillStyle=grad;
+                    ctx.fillRect(d.waveX,0,d.width,worldSize);
+                    // Buih depan
+                    ctx.fillStyle='rgba(255,255,255,0.9)';
+                    ctx.fillRect(d.waveX,0,15,worldSize);
+                    ctx.fillStyle='rgba(255,255,255,0.5)';
+                    ctx.fillRect(d.waveX+15,0,10,worldSize);
+                    // Buih belakang
+                    ctx.fillStyle='rgba(0,50,200,0.6)';
+                    ctx.fillRect(d.waveX+d.width-20,0,20,worldSize);
+                }
+            }
             if(player.tornadoActive){
                 const tx=player.tornadoX, ty=player.tornadoY;
                 const grad = ctx.createRadialGradient(tx,ty,0,tx,ty,player.tornadoRadius);
@@ -382,7 +401,7 @@
             const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.45)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H)}
         let lastTime=0;function loop(ts){const dt=Math.min((ts-lastTime)/1000,0.05);lastTime=ts;if(gameRunning&&!gamePaused)update(dt);render();requestAnimationFrame(loop)}requestAnimationFrame(loop);
         updateHealthUI();updateXPUI();updateLevelUI();updateTimerUI();updateBestRecordUI();
-        console.log('✅ Perubahan: tsunami jelas, skill baru, final boss tiap 5 menit, musuh diperlambat');
+        console.log('✅ Tsunami diperbaiki: visual jelas, damage ringan, tidak tiba-tiba mati');
     })();
     </script>
 </body>
