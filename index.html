@@ -235,7 +235,7 @@
             {id:'bonus_xp', name:'Bonus XP', icon:'✨', desc:'Dapatkan 30 XP', rarity:'common', apply:()=>{gainXP(30)}},
             {id:'xp_boost', name:'Peningkat XP', icon:'📈', desc:'+50% XP', rarity:'epic', apply:()=>{player.xpGainMult *= 1.5}},
             {id:'drone', name:'Drone Tempur', icon:'🤖', desc:'+1 drone', rarity:'legendary', apply:()=>{player.droneCount++; player.droneCooldown = 0}},
-            {id:'plane', name:'Pesawat Tempur', icon:'✈️', desc:'Pesawat lebih cepat', rarity:'legendary', apply:()=>{player.planeEnabled = true; player.planeCooldown = Math.max(4, player.planeCooldown - 1)}},
+            {id:'plane', name:'Pesawat Tempur', icon:'✈️', desc:'Pesawat menjatuhkan bom', rarity:'legendary', apply:()=>{player.planeEnabled = true; player.planeCooldown = 0; player.planeBombCount = 1; player.planeColor = '#aaaaaa';}},
             {id:'bomb', name:'Bom', icon:'💣', desc:'Bom lebih besar', rarity:'epic', apply:()=>{player.bombEnabled = true; player.bombRadius = (player.bombRadius||120)+30}},
             {id:'tornado', name:'Tornado', icon:'🌪️', desc:'Tornado makin besar & kuat', rarity:'legendary', apply:()=>{player.tornadoEnabled = true; player.tornadoRadius = (player.tornadoRadius||150)+30; player.tornadoDamage = (player.tornadoDamage||20)+10; player.tornadoPull = (player.tornadoPull||100)+50; player.tornadoCooldown = Math.max(8, player.tornadoCooldown - 1)}},
             {id:'chain_lightning', name:'Petir Berantai', icon:'⚡', desc:'+1 target petir', rarity:'legendary', apply:()=>{player.chainLightning = true; player.chainCount = (player.chainCount||2)+1}},
@@ -244,8 +244,7 @@
             {id:'xp_steal', name:'Pencuri XP', icon:'🤑', desc:'+1 XP per kill', rarity:'rare', apply:()=>{player.xpSteal = (player.xpSteal||0)+1}},
             {id:'attack_speed', name:'Kecepatan Serangan', icon:'⚡', desc:'+25% attack speed', rarity:'epic', apply:()=>{player.fireRateMult *= 1.25}},
             {id:'explosive_kills', name:'Ledakan Tiap Kill', icon:'💥', desc:'Ledakan lebih besar', rarity:'legendary', apply:()=>{player.explosiveKills = true; player.explosionRadius = (player.explosionRadius||50)+20}},
-            // Transcendent Sword
-            {id:'transcendent_sword', name:'Pedang Transenden', icon:'⚔️', desc:'Pedang raksasa AOE setiap 15 detik. Evolusi 3x: radius 1 layar', rarity:'transcendent', apply:()=>{
+            {id:'transcendent_sword', name:'Pedang Transenden', icon:'⚔️', desc:'Pedang raksasa AOE setiap 15 detik', rarity:'transcendent', apply:()=>{
                 player.transcendentSword = true;
                 player.transcendentCooldown = 0;
                 const currentCount = player.upgradeCounts['transcendent_sword'] || 0;
@@ -286,14 +285,16 @@
             xpSteal: 0, explosiveKills: false, explosionRadius: 50, bossDamageMult: 1, shieldCooldown: 0,
             upgradeCounts: {}, xpGainMult: 1, laserOrbital: false, laserCooldown: 0, laserAngle: 0,
             droneCount: 0, droneCooldown: 0, droneFireRate: 1.5,
-            planeEnabled: false, planeCooldown: 0, planeDoubleBomb: false,
+            planeEnabled: false, planeCooldown: 0, planeDoubleBomb: false, planeBombCount: 1, planeColor: '#aaaaaa',
             bombEnabled: false, bombCooldown: 0, bombRadius: 120, bombDouble: false,
             tornadoEnabled: false, tornadoCooldown: 0, tornadoActive: false, tornadoTimer: 0,
             tornadoX: 0, tornadoY: 0, tornadoRadius: 150, tornadoDamage: 20, tornadoPull: 100, tornadoDuration: 5,
             // Transendent
             transcendentSword: false, transcendentCooldown: 0, transcendentSwordActive: false, transcendentSwordTimer: 0,
             transcendentSwordX: 0, transcendentSwordY: 0, transcendentSwordRadius: 300, transcendentSwordDamage: 200,
-            transcendentSwordEvolved: false
+            transcendentSwordEvolved: false,
+            // Visual pesawat
+            planeVisualActive: false, planeVisualTimer: 0, planeVisualX: 0, planeVisualY: 0
         };
 
         function resetPlayer() {
@@ -310,13 +311,14 @@
                 bossDamageMult: 1, shieldCooldown: 0, upgradeCounts: {}, xpGainMult: 1,
                 laserOrbital: false, laserCooldown: 0, laserAngle: 0,
                 droneCount: 0, droneCooldown: 0, droneFireRate: 1.5,
-                planeEnabled: false, planeCooldown: 0, planeDoubleBomb: false,
+                planeEnabled: false, planeCooldown: 0, planeDoubleBomb: false, planeBombCount: 1, planeColor: '#aaaaaa',
                 bombEnabled: false, bombCooldown: 0, bombRadius: 120, bombDouble: false,
                 tornadoEnabled: false, tornadoCooldown: 0, tornadoActive: false, tornadoTimer: 0,
                 tornadoX: 0, tornadoY: 0, tornadoRadius: 150, tornadoDamage: 20, tornadoPull: 100, tornadoDuration: 5,
                 transcendentSword: false, transcendentCooldown: 0, transcendentSwordActive: false, transcendentSwordTimer: 0,
                 transcendentSwordX: 0, transcendentSwordY: 0, transcendentSwordRadius: 300, transcendentSwordDamage: 200,
-                transcendentSwordEvolved: false
+                transcendentSwordEvolved: false,
+                planeVisualActive: false, planeVisualTimer: 0, planeVisualX: 0, planeVisualY: 0
             });
         }
 
@@ -518,7 +520,7 @@
                 case 'shield': player.shieldCooldown = Math.max(1, player.shieldCooldown - 1 * (tier/10)); break;
                 case 'laser_orbital': player.laserCooldown = Math.max(0.5, player.laserCooldown - 0.5 * (tier/10)); break;
                 case 'drone': player.droneCount += 1 * (tier/10); break;
-                case 'plane': player.planeCooldown = Math.max(2, player.planeCooldown - 1 * (tier/10)); break;
+                case 'plane': player.planeBombCount += 1; player.planeCooldown = Math.max(3, player.planeCooldown - 1); player.planeColor = tier >= 5 ? '#ffd700' : '#00ffff'; break;
                 case 'bomb': player.bombRadius += 50 * (tier/10); break;
                 case 'tornado': player.tornadoRadius += 50 * (tier/10); player.tornadoDamage += 20 * (tier/10); player.tornadoPull += 50 * (tier/10); break;
                 case 'chain_lightning': player.chainCount += 1 * (tier/10); break;
@@ -662,12 +664,40 @@
                     }
                 }
             }
+            // Pesawat
+            if (player.planeEnabled) {
+                player.planeCooldown -= dt;
+                if (player.planeVisualActive) {
+                    player.planeVisualTimer -= dt;
+                    if (player.planeVisualTimer <= 0) player.planeVisualActive = false;
+                }
+                if (player.planeCooldown <= 0) {
+                    player.planeCooldown = 8;
+                    const target = findNearestEnemy();
+                    if (target) {
+                        player.planeVisualActive = true;
+                        player.planeVisualTimer = 1.5;
+                        player.planeVisualX = target.x;
+                        player.planeVisualY = target.y;
+                        const bombCount = player.planeBombCount || 1;
+                        for (let i = 0; i < bombCount; i++) {
+                            const offsetX = (i - (bombCount-1)/2) * 40;
+                            const offsetY = (i - (bombCount-1)/2) * 40;
+                            spawnBomb(target.x + offsetX, target.y + offsetY, player.bombRadius);
+                        }
+                    }
+                }
+            }
             if (player.poisonAura) for (const e of enemies) if (Math.sqrt((e.x - player.x) ** 2 + (e.y - player.y) ** 2) < player.poisonAuraRadius) { e.poisoned = 2; e.poisonTimer = 0.5; }
             if (player.laserOrbital) { player.laserCooldown -= dt; player.laserAngle += dt * 2.5; if (player.laserCooldown <= 0) { player.laserCooldown = 3; const target = findNearestEnemy(); if (target) { const orbX = player.x + Math.cos(player.laserAngle) * 80, orbY = player.y + Math.sin(player.laserAngle) * 80; const angle = Math.atan2(target.y - orbY, target.x - orbX); projectiles.push({ x: orbX, y: orbY, vx: Math.cos(angle) * 700, vy: Math.sin(angle) * 700, damage: 40 * player.damageMult, pierce: 5, hitEnemies: new Set(), radius: 14, color: '#ff0000', glow: '#ff4444', life: 1.5 }); } } }
             if (player.droneCount > 0) { player.droneCooldown -= dt; if (player.droneCooldown <= 0) { player.droneCooldown = player.droneFireRate; const target = findNearestEnemy(); if (target) { for (let i = 0; i < player.droneCount; i++) { const angleOffset = i * 2 * Math.PI / player.droneCount; const dxp = player.x + Math.cos(angleOffset) * 70, dyp = player.y + Math.sin(angleOffset) * 70; const angle = Math.atan2(target.y - dyp, target.x - dxp); projectiles.push({ x: dxp, y: dyp, vx: Math.cos(angle) * 450, vy: Math.sin(angle) * 450, damage: 15 * player.damageMult, pierce: 0, hitEnemies: new Set(), radius: 4, color: '#00ff88', glow: '#00cc66', life: 1.2 }); } } } }
-            if (player.planeEnabled) { player.planeCooldown -= dt; if (player.planeCooldown <= 0) { player.planeCooldown = 8; const target = findNearestEnemy(); if (target) { spawnBomb(target.x, target.y, player.bombRadius); } } }
             if (player.bombEnabled) { player.bombCooldown -= dt; if (player.bombCooldown <= 0) { player.bombCooldown = 6; const target = findNearestEnemy(); if (target) spawnBomb(target.x, target.y, player.bombRadius); } }
             if (player.fireAura) for (const e of enemies) if (Math.sqrt((e.x - player.x) ** 2 + (e.y - player.y) ** 2) < 80) damageEnemy(e, player.fireAuraDamage * player.damageMult * dt);
+            // Aura particles
+            if (player.fireAura && Math.random() < 0.3) { const angle = Math.random() * Math.PI * 2; const dist = 50 + Math.random() * 20; spawnParticles(player.x + Math.cos(angle) * dist, player.y + Math.sin(angle) * dist, '#ff4500', 2, 30, 0.5, 3); }
+            if (player.poisonAura && Math.random() < 0.2) { const angle = Math.random() * Math.PI * 2; const dist = Math.random() * (player.poisonAuraRadius || 100); spawnParticles(player.x + Math.cos(angle) * dist, player.y + Math.sin(angle) * dist, '#00ff00', 1, 20, 0.4, 2); }
+            if (player.energyShield && Math.random() < 0.1) { const angle = Math.random() * Math.PI * 2; spawnParticles(player.x + Math.cos(angle) * (player.radius + 5), player.y + Math.sin(angle) * (player.radius + 5), '#00ffff', 1, 20, 0.3, 2); }
+            if (player.reflectShield && Math.random() < 0.1) { const angle = Math.random() * Math.PI * 2; spawnParticles(player.x + Math.cos(angle) * (player.radius + 10), player.y + Math.sin(angle) * (player.radius + 10), '#ffffff', 1, 20, 0.3, 2); }
             for (let i = bombs.length - 1; i >= 0; i--) { bombs[i].timer -= dt; if (bombs[i].timer <= 0) { explodeBomb(bombs[i]); bombs.splice(i, 1); } }
             enemySpawnTimer -= dt; if (enemySpawnTimer <= 0) { spawnEnemy(); enemySpawnTimer = Math.max(0.3, 1.0 - gameTime * 0.005); }
             bossSpawnTimer -= dt; if (bossSpawnTimer <= 0) { spawnBoss(); bossSpawnTimer = 45; }
@@ -698,6 +728,13 @@
             if (screenShake > 0) screenShake *= Math.pow(0.02, dt); if (screenShake < 0.1) screenShake = 0;
         }
 
+        function renderAuras() {
+            if (player.fireAura) { ctx.beginPath(); ctx.arc(player.x, player.y, 60 + Math.sin(gameTime*5)*10, 0, Math.PI*2); ctx.strokeStyle = '#ff4500'; ctx.lineWidth = 3; ctx.shadowColor = '#ff4500'; ctx.shadowBlur = 20; ctx.stroke(); ctx.shadowBlur = 0; }
+            if (player.poisonAura) { ctx.beginPath(); ctx.arc(player.x, player.y, player.poisonAuraRadius||100, 0, Math.PI*2); ctx.strokeStyle = '#00ff00'; ctx.lineWidth = 2; ctx.shadowColor = '#00ff00'; ctx.shadowBlur = 15; ctx.stroke(); ctx.shadowBlur = 0; }
+            if (player.energyShield) { ctx.beginPath(); ctx.arc(player.x, player.y, player.radius+10, 0, Math.PI*2); ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 2; ctx.shadowColor = '#00ffff'; ctx.shadowBlur = 15; ctx.stroke(); ctx.shadowBlur = 0; }
+            if (player.reflectShield) { ctx.beginPath(); ctx.arc(player.x, player.y, player.radius+15, 0, Math.PI*2); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 20; ctx.stroke(); ctx.shadowBlur = 0; }
+        }
+
         function render() {
             ctx.clearRect(0, 0, W, H);
             const cx = player.x - W / 2, cy = player.y - H / 2, sx = (Math.random() - 0.5) * screenShake * 2, sy = (Math.random() - 0.5) * screenShake * 2;
@@ -708,106 +745,54 @@
             for (let y = sty; y < cy + H + gs; y += gs) { ctx.beginPath(); ctx.moveTo(cx - 20, y); ctx.lineTo(cx + W + 20, y); ctx.stroke(); }
             for (const s of backgroundStars) { s.twinkle += 0.03; ctx.fillStyle = `rgba(200,220,255,${s.a * (0.6 + 0.4 * Math.sin(s.twinkle))})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.28); ctx.fill(); }
             // Barrier world
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.lineWidth = 4;
-            ctx.shadowColor = '#ffffff';
-            ctx.shadowBlur = 15;
-            ctx.strokeRect(0, 0, worldSize, worldSize);
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([20, 15]);
-            ctx.strokeRect(0, 0, worldSize, worldSize);
-            ctx.setLineDash([]);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)'; ctx.lineWidth = 4; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 15; ctx.strokeRect(0, 0, worldSize, worldSize); ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; ctx.lineWidth = 2; ctx.setLineDash([20, 15]); ctx.strokeRect(0, 0, worldSize, worldSize); ctx.setLineDash([]);
             for (const d of disasters) if (d.type === 'tsunami') { const grad = ctx.createLinearGradient(d.waveX, 0, d.waveX + d.width, 0); grad.addColorStop(0, 'rgba(0,100,255,0.8)'); grad.addColorStop(1, 'rgba(0,50,200,0.4)'); ctx.fillStyle = grad; ctx.fillRect(d.waveX, 0, d.width, worldSize); ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(d.waveX, 0, 15, worldSize); ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillRect(d.waveX + 15, 0, 10, worldSize); ctx.fillStyle = 'rgba(0,50,200,0.6)'; ctx.fillRect(d.waveX + d.width - 20, 0, 20, worldSize); }
             if (player.tornadoActive) { const tx = player.tornadoX, ty = player.tornadoY; const grad = ctx.createRadialGradient(tx, ty, 0, tx, ty, player.tornadoRadius); grad.addColorStop(0, 'rgba(200,200,200,0.1)'); grad.addColorStop(0.5, 'rgba(255,255,255,0.25)'); grad.addColorStop(1, 'rgba(200,200,200,0)'); ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(tx, ty, player.tornadoRadius, 0, 6.28); ctx.fill(); for (let i = 0; i < 3; i++) { ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2; ctx.beginPath(); for (let a = 0; a < Math.PI * 2; a += 0.1) { const r = player.tornadoRadius * (0.3 + 0.2 * Math.sin(a * 3 + gameTime * 5 + i)); const x = tx + Math.cos(a + gameTime * 2 + i) * r; const y = ty + Math.sin(a + gameTime * 2 + i) * r; if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.stroke(); } }
             // Transcendent Sword Visual
             if (player.transcendentSwordActive) {
-                const sx = player.transcendentSwordX, sy = player.transcendentSwordY;
-                const timeRatio = player.transcendentSwordTimer / 1;
-                const offsetY = (1 - timeRatio) * 200;
-                ctx.fillStyle = player.transcendentSwordEvolved ? '#ffffff' : '#ffd700';
-                ctx.shadowColor = player.transcendentSwordEvolved ? '#00ffff' : '#ff00ff';
-                ctx.shadowBlur = 40;
-                ctx.beginPath();
-                ctx.moveTo(sx - 20, sy - 200 + offsetY);
-                ctx.lineTo(sx + 20, sy - 200 + offsetY);
-                ctx.lineTo(sx + 10, sy - 100 + offsetY);
-                ctx.lineTo(sx, sy - 20 + offsetY);
-                ctx.lineTo(sx - 10, sy - 100 + offsetY);
-                ctx.closePath();
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = '#8B4513';
-                ctx.fillRect(sx - 8, sy - 240 + offsetY, 16, 40);
-                ctx.strokeStyle = player.transcendentSwordEvolved ? 'rgba(0,255,255,0.9)' : 'rgba(255,215,0,0.8)';
-                ctx.lineWidth = 5;
-                ctx.beginPath();
-                ctx.arc(sx, sy, player.transcendentSwordRadius, 0, Math.PI * 2);
-                ctx.stroke();
+                const sx = player.transcendentSwordX, sy = player.transcendentSwordY; const timeRatio = player.transcendentSwordTimer / 1; const offsetY = (1 - timeRatio) * 200;
+                ctx.fillStyle = player.transcendentSwordEvolved ? '#ffffff' : '#ffd700'; ctx.shadowColor = player.transcendentSwordEvolved ? '#00ffff' : '#ff00ff'; ctx.shadowBlur = 40;
+                ctx.beginPath(); ctx.moveTo(sx - 20, sy - 200 + offsetY); ctx.lineTo(sx + 20, sy - 200 + offsetY); ctx.lineTo(sx + 10, sy - 100 + offsetY); ctx.lineTo(sx, sy - 20 + offsetY); ctx.lineTo(sx - 10, sy - 100 + offsetY); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0;
+                ctx.fillStyle = '#8B4513'; ctx.fillRect(sx - 8, sy - 240 + offsetY, 16, 40);
+                ctx.strokeStyle = player.transcendentSwordEvolved ? 'rgba(0,255,255,0.9)' : 'rgba(255,215,0,0.8)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(sx, sy, player.transcendentSwordRadius, 0, Math.PI * 2); ctx.stroke();
             }
             for (const o of xpOrbs) { const g2 = 14 + Math.sin(gameTime * 5 + o.x) * 4; const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, g2); g.addColorStop(0, 'rgba(0,255,136,0.8)'); g.addColorStop(1, 'rgba(0,200,100,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(o.x, o.y, g2, 0, 6.28); ctx.fill(); ctx.fillStyle = '#00ff88'; ctx.beginPath(); ctx.arc(o.x, o.y, o.radius, 0, 6.28); ctx.fill(); }
             for (const e of enemies) { ctx.fillStyle = e.hitFlash > 0 ? '#fff' : e.color; ctx.shadowColor = e.glow; ctx.shadowBlur = 18; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, 6.28); ctx.stroke(); }
             for (const b of bosses) { ctx.fillStyle = b.hitFlash > 0 ? '#fff' : b.color; ctx.shadowColor = b.glow; ctx.shadowBlur = 30; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = b.glow; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius + 5, 0, 6.28); ctx.stroke(); ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(b.element, b.x, b.y - b.radius - 15); }
             for (const fb of finalBosses) { ctx.fillStyle = fb.hitFlash > 0 ? '#fff' : fb.color; ctx.shadowColor = fb.glow; ctx.shadowBlur = 40; ctx.beginPath(); ctx.arc(fb.x, fb.y, fb.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = fb.glow; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(fb.x, fb.y, fb.radius + 8, 0, 6.28); ctx.stroke(); ctx.font = '32px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(fb.element, fb.x, fb.y - fb.radius - 20); }
+            // Pesawat visual
+            if (player.planeVisualActive) {
+                const px = player.planeVisualX, py = player.planeVisualY; const timeRatio = player.planeVisualTimer / 1.5;
+                const startX = px - 400; const currentX = startX + (1 - timeRatio) * 400; const currentY = py - 150 + (1 - timeRatio) * 150;
+                ctx.fillStyle = player.planeColor || '#aaaaaa'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 20;
+                ctx.beginPath(); ctx.moveTo(currentX, currentY); ctx.lineTo(currentX + 30, currentY + 5); ctx.lineTo(currentX + 10, currentY + 10); ctx.lineTo(currentX + 30, currentY + 20); ctx.lineTo(currentX, currentY + 15); ctx.lineTo(currentX - 10, currentY + 10); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0;
+            }
             for (const p of projectiles) { ctx.fillStyle = p.type === 'knife' ? '#c86bff' : '#fff'; ctx.shadowColor = p.glow; ctx.shadowBlur = 16; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; }
             for (const b of bombs) { ctx.fillStyle = '#333'; ctx.shadowColor = '#ff6600'; ctx.shadowBlur = 15; ctx.beginPath(); ctx.arc(b.x, b.y, 12, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = '#ff0000'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('💣', b.x, b.y + 3); }
             if (player.droneCount > 0) for (let i = 0; i < player.droneCount; i++) { const angleOffset = i * 2 * Math.PI / player.droneCount; const dxp = player.x + Math.cos(angleOffset) * 70, dyp = player.y + Math.sin(angleOffset) * 70; ctx.fillStyle = '#00ff88'; ctx.shadowColor = '#00ff88'; ctx.shadowBlur = 20; ctx.fillRect(dxp - 8, dyp - 6, 16, 12); ctx.fillStyle = '#fff'; ctx.fillRect(dxp - 4, dyp - 8, 8, 4); ctx.shadowBlur = 0; }
             if (player.laserOrbital) { const ox = player.x + Math.cos(player.laserAngle) * 80, oy = player.y + Math.sin(player.laserAngle) * 80; ctx.fillStyle = '#ff2222'; ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 30; ctx.beginPath(); ctx.arc(ox, oy, 16, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; }
             const pg = ctx.createRadialGradient(player.x, player.y, 0, player.x, player.y, player.radius * 3.5); pg.addColorStop(0, 'rgba(0,240,255,0.5)'); pg.addColorStop(1, 'rgba(0,240,255,0)'); ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(player.x, player.y, player.radius * 3.5, 0, 6.28); ctx.fill();
             ctx.fillStyle = '#00e5ff'; ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 24; ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0;
+            // Auras
+            renderAuras();
             for (const p of particles) { const a = p.life / p.maxLife; ctx.fillStyle = p.color + Math.floor(a * 180).toString(16).padStart(2, '0'); ctx.beginPath(); ctx.arc(p.x, p.y, p.radius * a, 0, 6.28); ctx.fill(); }
             for (const d of damageTexts) { const a = d.life / d.maxLife; ctx.fillStyle = d.color + Math.floor(a * 255).toString(16).padStart(2, '0'); ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(d.text, d.x, d.y); }
             ctx.restore();
             // Mini map
-            const miniMapSize = 150;
-            const miniMapX = 20;
-            const miniMapY = H - miniMapSize - 20;
-            const scale = miniMapSize / worldSize;
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-            ctx.fillRect(miniMapX, miniMapY, miniMapSize, miniMapSize);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(miniMapX, miniMapY, miniMapSize, miniMapSize);
-            ctx.fillStyle = '#00f0ff';
-            ctx.beginPath();
-            ctx.arc(miniMapX + player.x * scale, miniMapY + player.y * scale, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#ff3333';
-            for (const e of enemies) {
-                const mx = miniMapX + e.x * scale;
-                const my = miniMapY + e.y * scale;
-                if (mx > miniMapX && mx < miniMapX + miniMapSize && my > miniMapY && my < miniMapY + miniMapSize) {
-                    ctx.fillRect(mx - 1, my - 1, 2, 2);
-                }
-            }
-            ctx.fillStyle = '#ff00ff';
-            for (const b of bosses) {
-                const mx = miniMapX + b.x * scale;
-                const my = miniMapY + b.y * scale;
-                if (mx > miniMapX && mx < miniMapX + miniMapSize && my > miniMapY && my < miniMapY + miniMapSize) {
-                    ctx.beginPath();
-                    ctx.arc(mx, my, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-            for (const fb of finalBosses) {
-                const mx = miniMapX + fb.x * scale;
-                const my = miniMapY + fb.y * scale;
-                if (mx > miniMapX && mx < miniMapX + miniMapSize && my > miniMapY && my < miniMapY + miniMapSize) {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    ctx.arc(mx, my, 4, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
+            const miniMapSize = 150; const miniMapX = 20; const miniMapY = H - miniMapSize - 20; const scale = miniMapSize / worldSize;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; ctx.fillRect(miniMapX, miniMapY, miniMapSize, miniMapSize); ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; ctx.lineWidth = 2; ctx.strokeRect(miniMapX, miniMapY, miniMapSize, miniMapSize);
+            ctx.fillStyle = '#00f0ff'; ctx.beginPath(); ctx.arc(miniMapX + player.x * scale, miniMapY + player.y * scale, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ff3333'; for (const e of enemies) { const mx = miniMapX + e.x * scale; const my = miniMapY + e.y * scale; if (mx > miniMapX && mx < miniMapX + miniMapSize && my > miniMapY && my < miniMapY + miniMapSize) { ctx.fillRect(mx - 1, my - 1, 2, 2); } }
+            ctx.fillStyle = '#ff00ff'; for (const b of bosses) { const mx = miniMapX + b.x * scale; const my = miniMapY + b.y * scale; if (mx > miniMapX && mx < miniMapX + miniMapSize && my > miniMapY && my < miniMapY + miniMapSize) { ctx.beginPath(); ctx.arc(mx, my, 3, 0, Math.PI * 2); ctx.fill(); } }
+            for (const fb of finalBosses) { const mx = miniMapX + fb.x * scale; const my = miniMapY + fb.y * scale; if (mx > miniMapX && mx < miniMapX + miniMapSize && my > miniMapY && my < miniMapY + miniMapSize) { ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(mx, my, 4, 0, Math.PI * 2); ctx.fill(); } }
             const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.45)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
         }
 
         let lastTime = 0; function gameLoop(ts) { const dt = Math.min((ts - lastTime) / 1000, 0.05); lastTime = ts; if (gameRunning && !gamePaused) update(dt); render(); requestAnimationFrame(gameLoop); }
         requestAnimationFrame(gameLoop);
         updateHealthUI(); updateXPUI(); updateLevelUI(); updateTimerUI(); updateBestRecordUI();
-        console.log('✅ Game siap: barrier world, minimap, evolusi UI tiap 10x, transcendent sword, pause');
+        console.log('✅ Game siap: barrier world, minimap, aura, pesawat visual, evolusi tiap 10x');
     </script>
 </body>
 </html>
