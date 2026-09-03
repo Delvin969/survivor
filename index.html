@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>⚡ SURVIVOR ULTRA - Pedang Transenden Evolusi</title>
+    <title>⚡ SURVIVOR ULTIMATE - Full Features</title>
     <style>
         :root {
             --bg: #0a0a12;
@@ -12,7 +12,6 @@
             --gold: #ffd700;
             --card-bg: rgba(18, 18, 35, 0.95);
             --card-border: rgba(0, 240, 255, 0.4);
-            --transcendent: #ff00ff;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -89,6 +88,31 @@
         @keyframes milestonePulse { 0%{box-shadow:0 0 20px rgba(255,215,0,0.8)} 50%{box-shadow:0 0 40px rgba(255,215,0,1),0 0 80px rgba(255,0,255,0.6)} 100%{box-shadow:0 0 20px rgba(255,215,0,0.8)} }
         .milestone-badge { position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--gold); color:#000; font-size:10px; font-weight:900; letter-spacing:2px; padding:4px 12px; border-radius:20px; z-index:2; box-shadow:0 0 20px gold; }
         .upgrade-count-badge { position:absolute; bottom:8px; right:10px; background:rgba(0,0,0,0.8); color:var(--gold); font-size:11px; font-weight:900; padding:2px 6px; border-radius:10px; z-index:2; }
+        .tier-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #ffd700;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            z-index: 3;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+        .tier-5 .tier-badge,
+        .tier-6 .tier-badge,
+        .tier-7 .tier-badge,
+        .tier-8 .tier-badge,
+        .tier-9 .tier-badge,
+        .tier-10 .tier-badge { animation: tierPulse 0.8s infinite; }
+        @keyframes tierPulse { 0%,100%{box-shadow:0 0 15px rgba(255,215,0,0.8)} 50%{box-shadow:0 0 30px rgba(255,215,0,1),0 0 50px rgba(255,0,255,0.6)} }
         .tier-1 { border-color: #00ff88; box-shadow:0 0 15px rgba(0,255,136,0.5); }
         .tier-2 { border-color: #00ccff; box-shadow:0 0 20px rgba(0,204,255,0.7); }
         .tier-3 { border-color: #ff00ff; box-shadow:0 0 25px rgba(255,0,255,0.8); }
@@ -99,6 +123,16 @@
         .tier-8 { border-color: #00ffff; box-shadow:0 0 55px rgba(0,255,255,1); }
         .tier-9 { border-color: #ffd700; box-shadow:0 0 60px rgba(255,215,0,1); animation:milestonePulse 0.8s infinite; }
         .tier-10 { border-color: #ff0000; box-shadow:0 0 80px rgba(255,0,0,1); animation:milestonePulse 0.5s infinite; }
+        .tier-1 .icon { filter: drop-shadow(0 0 12px #00ff88); }
+        .tier-2 .icon { filter: drop-shadow(0 0 15px #00ccff); }
+        .tier-3 .icon { filter: drop-shadow(0 0 18px #ff00ff); }
+        .tier-4 .icon { filter: drop-shadow(0 0 22px #ffd700); }
+        .tier-5 .icon { filter: drop-shadow(0 0 25px #ffffff); }
+        .tier-6 .icon { filter: drop-shadow(0 0 28px #ff4500); }
+        .tier-7 .icon { filter: drop-shadow(0 0 30px #ff1493); }
+        .tier-8 .icon { filter: drop-shadow(0 0 32px #00ffff); }
+        .tier-9 .icon { filter: drop-shadow(0 0 35px #ffd700); }
+        .tier-10 .icon { filter: drop-shadow(0 0 40px #ff0000); }
         #game-over-overlay { position:absolute; top:0; left:0; width:100%; height:100%; display:none; justify-content:center; align-items:center; pointer-events:all; z-index:30; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); }
         #game-over-overlay.active { display:flex; }
         #game-over-panel { background:rgba(15,15,30,0.95); border:2px solid rgba(255,59,107,0.5); border-radius:24px; padding:40px 48px; text-align:center; box-shadow:0 0 80px rgba(255,59,107,0.3); max-width:500px; }
@@ -140,530 +174,640 @@
         </div>
         <div id="upgrade-overlay"><div id="upgrade-panel"></div></div>
         <div id="game-over-overlay"><div id="game-over-panel"><h1>GAME OVER</h1><div class="stats">⏱️ Bertahan: <span id="go-time">00:00</span><br>💀 Membunuh: <span id="go-kills">0</span><br>⭐ Level: <span id="go-level">1</span><br>👑 Bos: <span id="go-bosses">0</span></div><button id="restart-btn" onclick="restartGame()">MAIN LAGI</button></div></div>
-        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTRA</span></h1><div class="subtitle">🌪️ TORNADO & PEDANG TRANSENDEN 🌪️</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 EXP dinamis • ⚡ Bos naik 3 level • 🌊 Tsunami jelas<br>⏸️ Pause di kanan atas • ⚔️ Pedang Transenden (evolusi 3x)</div></div></div>
+        <div id="start-overlay"><div id="start-panel"><h1>SURVIVOR <span class="accent">ULTIMATE</span></h1><div class="subtitle">🌪️ TORNADO & PEDANG TRANSENDEN 🌪️</div><button id="start-btn" onclick="startGame()">MULAI</button><div class="controls-hint"><kbd>W A S D</kbd> / <kbd>←↑↓→</kbd> bergerak<br>🔥 EXP dinamis • ⚡ Bos naik 3 level • 🌊 Tsunami jelas<br>⏸️ Pause di kanan atas • ⚔️ Pedang Transenden (evolusi 3x)</div></div></div>
     </div>
     <script>
-    // ==================== SETUP ====================
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    let W, H, DPR;
-    function resizeCanvas() {
-        DPR = Math.min(window.devicePixelRatio || 1, 2);
-        W = innerWidth; H = innerHeight;
-        canvas.width = W * DPR; canvas.height = H * DPR;
-        canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    }
-    resizeCanvas(); addEventListener('resize', resizeCanvas);
+        // ==================== SETUP ====================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let W, H, DPR;
+        function resizeCanvas() {
+            DPR = Math.min(window.devicePixelRatio || 1, 2);
+            W = innerWidth; H = innerHeight;
+            canvas.width = W * DPR; canvas.height = H * DPR;
+            canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        }
+        resizeCanvas(); addEventListener('resize', resizeCanvas);
 
-    // Audio
-    let audioCtx = null;
-    function initAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} } if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
-    function snd(f, d, o, g, v) { if (!audioCtx) return; try { const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = o || 'sine'; osc.frequency.setValueAtTime(f, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(d, audioCtx.currentTime + v); gain.gain.setValueAtTime(g || 0.08, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + v); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + v); } catch(e) {} }
-    function shootSnd() { snd(800, 200, 0.06, 'square', 0.04); }
-    function expSnd() { if (!audioCtx) return; try { const b = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.15, audioCtx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (d.length * 0.3)); const s = audioCtx.createBufferSource(); s.buffer = b; const g = audioCtx.createGain(); g.gain.setValueAtTime(0.12, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12); s.connect(g); g.connect(audioCtx.destination); s.start(); s.stop(audioCtx.currentTime + 0.12); } catch(e) {} }
-    function levelSnd() { snd(523, 1047, 0.3, 'sine', 0.08); }
-    function bombSnd() { snd(100, 50, 0.8, 'sawtooth', 0.15); }
-    function tornadoSnd() { snd(200, 50, 0.6, 'sine', 0.1); }
-    function finalBossSnd() { snd(50, 200, 0.5, 'sawtooth', 0.15); }
-    function transcendentSnd() { snd(100, 500, 0.5, 'sine', 0.15); }
-    function evoSnd() { snd(300, 1200, 0.5, 'sine', 0.08); snd(800, 2400, 0.3, 'sine', 0.08); }
+        // Audio
+        let audioCtx = null;
+        function initAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} } if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
+        function snd(f, d, o, g, v) { if (!audioCtx) return; try { const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.type = o || 'sine'; osc.frequency.setValueAtTime(f, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(d, audioCtx.currentTime + v); gain.gain.setValueAtTime(g || 0.08, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + v); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + v); } catch(e) {} }
+        function shootSnd() { snd(800, 200, 0.06, 'square', 0.04); }
+        function expSnd() { if (!audioCtx) return; try { const b = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.15, audioCtx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (d.length * 0.3)); const s = audioCtx.createBufferSource(); s.buffer = b; const g = audioCtx.createGain(); g.gain.setValueAtTime(0.12, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12); s.connect(g); g.connect(audioCtx.destination); s.start(); s.stop(audioCtx.currentTime + 0.12); } catch(e) {} }
+        function levelSnd() { snd(523, 1047, 0.3, 'sine', 0.08); }
+        function bombSnd() { snd(100, 50, 0.8, 'sawtooth', 0.15); }
+        function tornadoSnd() { snd(200, 50, 0.6, 'sine', 0.1); }
+        function finalBossSnd() { snd(50, 200, 0.5, 'sawtooth', 0.15); }
+        function transcendentSnd() { snd(100, 500, 0.5, 'sine', 0.15); }
+        function evoSnd() { snd(300, 1200, 0.5, 'sine', 0.08); snd(800, 2400, 0.3, 'sine', 0.08); }
 
-    // ==================== STATE ====================
-    let gameRunning = false, gamePaused = false, gameTime = 0, kills = 0, level = 1, xp = 0, xpToNext = 20;
-    let screenShake = 0, mouseX = W/2, mouseY = H/2, bossesKilled = 0;
-    let bestKills = parseInt(localStorage.getItem('survivor_best_kills') || '0');
-    let bestTime = parseInt(localStorage.getItem('survivor_best_time') || '0');
-    const worldSize = 12000;
-    const milestoneLevels = [10,20,30,40,50,60,70,80,90,100];
-    let pendingUpgrades = 0;
+        // ==================== STATE ====================
+        let gameRunning = false, gamePaused = false, gameTime = 0, kills = 0, level = 1, xp = 0, xpToNext = 20;
+        let screenShake = 0, mouseX = W/2, mouseY = H/2, bossesKilled = 0;
+        let bestKills = parseInt(localStorage.getItem('survivor_best_kills') || '0');
+        let bestTime = parseInt(localStorage.getItem('survivor_best_time') || '0');
+        const worldSize = 12000;
+        const milestoneLevels = [10,20,30,40,50,60,70,80,90,100];
+        let pendingUpgrades = 0;
 
-    // ==================== UPGRADE POOL (bertumpuk) ====================
-    const upgradePool = [
-        {id:'dmg', name:'Kerusakan +25%', icon:'⚔️', desc:'Damage +25%', rarity:'common', apply:()=>{player.damageMult *= 1.25}},
-        {id:'firerate', name:'Tembakan Cepat +20%', icon:'🔥', desc:'Fire rate +20%', rarity:'common', apply:()=>{player.fireRateMult *= 1.20}},
-        {id:'speed', name:'Kecepatan +15%', icon:'💨', desc:'Kecepatan +15%', rarity:'common', apply:()=>{player.baseSpeedMult *= 1.15}},
-        {id:'maxhp', name:'Darah Maks +25', icon:'❤️', desc:'+25 HP', rarity:'common', apply:()=>{player.maxHp += 25; player.hp += 25}},
-        {id:'multishot', name:'Multi-Tembak +1', icon:'🎯', desc:'+1 proyektil', rarity:'rare', apply:()=>{player.projectileCount++}},
-        {id:'pierce', name:'Tembus +1', icon:'💠', desc:'+1 pierce', rarity:'rare', apply:()=>{player.pierce++}},
-        {id:'throwing_knife', name:'Pisau Lempar', icon:'🔪', desc:'+1 pisau per lemparan', rarity:'legendary', apply:()=>{player.throwingKnives++; player.throwingKnifeCooldown = 0}},
-        {id:'lightning', name:'Petir Otomatis', icon:'⚡', desc:'Petir makin cepat', rarity:'legendary', apply:()=>{player.lightningEnabled = true; player.lightningCooldown = Math.max(1, player.lightningCooldown - 0.5)}},
-        {id:'crit', name:'Critical +10%', icon:'💥', desc:'+10% crit', rarity:'epic', apply:()=>{player.critChance = Math.min(0.9, player.critChance + 0.1)}},
-        {id:'regen', name:'Regenerasi', icon:'✨', desc:'+1 HP/detik', rarity:'epic', apply:()=>{player.hpRegen += 1}},
-        {id:'magnet', name:'Magnet +40%', icon:'🧲', desc:'+40% magnet', rarity:'rare', apply:()=>{player.magnetMult *= 1.4}},
-        {id:'heal', name:'Penyembuhan', icon:'💚', desc:'Pulihkan 50 HP', rarity:'common', apply:()=>{player.hp = Math.min(player.maxHp, player.hp + 50)}},
-        {id:'fire_aura', name:'Aura Api', icon:'🔥', desc:'Aura api +5 damage', rarity:'epic', apply:()=>{player.fireAura = true; player.fireAuraDamage = (player.fireAuraDamage||5)+5}},
-        {id:'poison_touch', name:'Racun', icon:'☠️', desc:'+10 damage racun', rarity:'epic', apply:()=>{player.poisonDamage += 10}},
-        {id:'thorns', name:'Duri Balasan', icon:'🌵', desc:'+5 damage pantulan', rarity:'rare', apply:()=>{player.thornsDamage += 5}},
-        {id:'vampiric', name:'Vampir', icon:'🦇', desc:'+5 HP per kill', rarity:'epic', apply:()=>{player.lifesteal += 5}},
-        {id:'shield', name:'Perisai Energi', icon:'🛡️', desc:'Cooldown perisai -1 detik', rarity:'legendary', apply:()=>{player.energyShield = true; player.shieldCooldown = Math.max(2, player.shieldCooldown - 1)}},
-        {id:'laser_orbital', name:'Laser Orbital', icon:'🔴', desc:'Laser lebih cepat', rarity:'legendary', apply:()=>{player.laserOrbital = true; player.laserCooldown = Math.max(1, player.laserCooldown - 0.5)}},
-        {id:'bonus_xp', name:'Bonus XP', icon:'✨', desc:'Dapatkan 30 XP', rarity:'common', apply:()=>{gainXP(30)}},
-        {id:'xp_boost', name:'Peningkat XP', icon:'📈', desc:'+50% XP', rarity:'epic', apply:()=>{player.xpGainMult *= 1.5}},
-        {id:'drone', name:'Drone Tempur', icon:'🤖', desc:'+1 drone', rarity:'legendary', apply:()=>{player.droneCount++; player.droneCooldown = 0}},
-        {id:'plane', name:'Pesawat Tempur', icon:'✈️', desc:'Pesawat lebih cepat', rarity:'legendary', apply:()=>{player.planeEnabled = true; player.planeCooldown = Math.max(4, player.planeCooldown - 1)}},
-        {id:'bomb', name:'Bom', icon:'💣', desc:'Bom lebih besar', rarity:'epic', apply:()=>{player.bombEnabled = true; player.bombRadius = (player.bombRadius||120)+30}},
-        {id:'tornado', name:'Tornado', icon:'🌪️', desc:'Tornado makin besar & kuat', rarity:'legendary', apply:()=>{player.tornadoEnabled = true; player.tornadoRadius = (player.tornadoRadius||150)+30; player.tornadoDamage = (player.tornadoDamage||20)+10; player.tornadoPull = (player.tornadoPull||100)+50; player.tornadoCooldown = Math.max(8, player.tornadoCooldown - 1)}},
-        {id:'chain_lightning', name:'Petir Berantai', icon:'⚡', desc:'+1 target petir', rarity:'legendary', apply:()=>{player.chainLightning = true; player.chainCount = (player.chainCount||2)+1}},
-        {id:'poison_aura', name:'Aura Racun', icon:'☠️', desc:'Aura racun lebih luas', rarity:'legendary', apply:()=>{player.poisonAura = true; player.poisonAuraRadius = (player.poisonAuraRadius||100)+30}},
-        {id:'reflect_shield', name:'Perisai Reflektif', icon:'🔰', desc:'+10% pantulan', rarity:'legendary', apply:()=>{player.reflectShield = true; player.reflectPercent = (player.reflectPercent||0.3)+0.1}},
-        {id:'xp_steal', name:'Pencuri XP', icon:'🤑', desc:'+1 XP per kill', rarity:'rare', apply:()=>{player.xpSteal = (player.xpSteal||0)+1}},
-        {id:'attack_speed', name:'Kecepatan Serangan', icon:'⚡', desc:'+25% attack speed', rarity:'epic', apply:()=>{player.fireRateMult *= 1.25}},
-        {id:'explosive_kills', name:'Ledakan Tiap Kill', icon:'💥', desc:'Ledakan lebih besar', rarity:'legendary', apply:()=>{player.explosiveKills = true; player.explosionRadius = (player.explosionRadius||50)+20}},
-        // ========== SKILL TRANSCENDENT ==========
-        {id:'transcendent_sword', name:'Pedang Transenden', icon:'⚔️', desc:'Pedang raksasa AOE setiap 15 detik. Evolusi 3x: radius 1 layar', rarity:'transcendent', apply:()=>{
-            player.transcendentSword = true;
-            player.transcendentCooldown = 0;
-            const currentCount = player.upgradeCounts['transcendent_sword'] || 0;
-            if (currentCount >= 2 && !player.transcendentSwordEvolved) {
-                // EVOLUSI: radius 1 layar
-                player.transcendentSwordEvolved = true;
-                player.transcendentSwordRadius = Math.max(window.innerWidth, window.innerHeight);
-                player.transcendentSwordDamage = 400;
-                const alert = document.getElementById('disaster-alert');
-                alert.textContent = '✨ EVOLUSI PEDANG TRANSENDEN! ✨';
-                alert.style.color = '#ffd700';
-                alert.style.display = 'block';
-                setTimeout(() => alert.style.display = 'none', 3000);
-                evoSnd();
-            } else {
-                player.transcendentSwordRadius = player.transcendentSwordRadius || 300;
-                player.transcendentSwordDamage = player.transcendentSwordDamage || 200;
-            }
-        }},
-    ];
+        // ==================== UPGRADE POOL ====================
+        const upgradePool = [
+            {id:'dmg', name:'Kerusakan +25%', icon:'⚔️', desc:'Damage +25%', rarity:'common', apply:()=>{player.damageMult *= 1.25}},
+            {id:'firerate', name:'Tembakan Cepat +20%', icon:'🔥', desc:'Fire rate +20%', rarity:'common', apply:()=>{player.fireRateMult *= 1.20}},
+            {id:'speed', name:'Kecepatan +15%', icon:'💨', desc:'Kecepatan +15%', rarity:'common', apply:()=>{player.baseSpeedMult *= 1.15}},
+            {id:'maxhp', name:'Darah Maks +25', icon:'❤️', desc:'+25 HP', rarity:'common', apply:()=>{player.maxHp += 25; player.hp += 25}},
+            {id:'multishot', name:'Multi-Tembak +1', icon:'🎯', desc:'+1 proyektil', rarity:'rare', apply:()=>{player.projectileCount++}},
+            {id:'pierce', name:'Tembus +1', icon:'💠', desc:'+1 pierce', rarity:'rare', apply:()=>{player.pierce++}},
+            {id:'throwing_knife', name:'Pisau Lempar', icon:'🔪', desc:'+1 pisau per lemparan', rarity:'legendary', apply:()=>{player.throwingKnives++; player.throwingKnifeCooldown = 0}},
+            {id:'lightning', name:'Petir Otomatis', icon:'⚡', desc:'Petir makin cepat', rarity:'legendary', apply:()=>{player.lightningEnabled = true; player.lightningCooldown = Math.max(1, player.lightningCooldown - 0.5)}},
+            {id:'crit', name:'Critical +10%', icon:'💥', desc:'+10% crit', rarity:'epic', apply:()=>{player.critChance = Math.min(0.9, player.critChance + 0.1)}},
+            {id:'regen', name:'Regenerasi', icon:'✨', desc:'+1 HP/detik', rarity:'epic', apply:()=>{player.hpRegen += 1}},
+            {id:'magnet', name:'Magnet +40%', icon:'🧲', desc:'+40% magnet', rarity:'rare', apply:()=>{player.magnetMult *= 1.4}},
+            {id:'heal', name:'Penyembuhan', icon:'💚', desc:'Pulihkan 50 HP', rarity:'common', apply:()=>{player.hp = Math.min(player.maxHp, player.hp + 50)}},
+            {id:'fire_aura', name:'Aura Api', icon:'🔥', desc:'Aura api +5 damage', rarity:'epic', apply:()=>{player.fireAura = true; player.fireAuraDamage = (player.fireAuraDamage||5)+5}},
+            {id:'poison_touch', name:'Racun', icon:'☠️', desc:'+10 damage racun', rarity:'epic', apply:()=>{player.poisonDamage += 10}},
+            {id:'thorns', name:'Duri Balasan', icon:'🌵', desc:'+5 damage pantulan', rarity:'rare', apply:()=>{player.thornsDamage += 5}},
+            {id:'vampiric', name:'Vampir', icon:'🦇', desc:'+5 HP per kill', rarity:'epic', apply:()=>{player.lifesteal += 5}},
+            {id:'shield', name:'Perisai Energi', icon:'🛡️', desc:'Cooldown perisai -1 detik', rarity:'legendary', apply:()=>{player.energyShield = true; player.shieldCooldown = Math.max(2, player.shieldCooldown - 1)}},
+            {id:'laser_orbital', name:'Laser Orbital', icon:'🔴', desc:'Laser lebih cepat', rarity:'legendary', apply:()=>{player.laserOrbital = true; player.laserCooldown = Math.max(1, player.laserCooldown - 0.5)}},
+            {id:'bonus_xp', name:'Bonus XP', icon:'✨', desc:'Dapatkan 30 XP', rarity:'common', apply:()=>{gainXP(30)}},
+            {id:'xp_boost', name:'Peningkat XP', icon:'📈', desc:'+50% XP', rarity:'epic', apply:()=>{player.xpGainMult *= 1.5}},
+            {id:'drone', name:'Drone Tempur', icon:'🤖', desc:'+1 drone', rarity:'legendary', apply:()=>{player.droneCount++; player.droneCooldown = 0}},
+            {id:'plane', name:'Pesawat Tempur', icon:'✈️', desc:'Pesawat lebih cepat', rarity:'legendary', apply:()=>{player.planeEnabled = true; player.planeCooldown = Math.max(4, player.planeCooldown - 1)}},
+            {id:'bomb', name:'Bom', icon:'💣', desc:'Bom lebih besar', rarity:'epic', apply:()=>{player.bombEnabled = true; player.bombRadius = (player.bombRadius||120)+30}},
+            {id:'tornado', name:'Tornado', icon:'🌪️', desc:'Tornado makin besar & kuat', rarity:'legendary', apply:()=>{player.tornadoEnabled = true; player.tornadoRadius = (player.tornadoRadius||150)+30; player.tornadoDamage = (player.tornadoDamage||20)+10; player.tornadoPull = (player.tornadoPull||100)+50; player.tornadoCooldown = Math.max(8, player.tornadoCooldown - 1)}},
+            {id:'chain_lightning', name:'Petir Berantai', icon:'⚡', desc:'+1 target petir', rarity:'legendary', apply:()=>{player.chainLightning = true; player.chainCount = (player.chainCount||2)+1}},
+            {id:'poison_aura', name:'Aura Racun', icon:'☠️', desc:'Aura racun lebih luas', rarity:'legendary', apply:()=>{player.poisonAura = true; player.poisonAuraRadius = (player.poisonAuraRadius||100)+30}},
+            {id:'reflect_shield', name:'Perisai Reflektif', icon:'🔰', desc:'+10% pantulan', rarity:'legendary', apply:()=>{player.reflectShield = true; player.reflectPercent = (player.reflectPercent||0.3)+0.1}},
+            {id:'xp_steal', name:'Pencuri XP', icon:'🤑', desc:'+1 XP per kill', rarity:'rare', apply:()=>{player.xpSteal = (player.xpSteal||0)+1}},
+            {id:'attack_speed', name:'Kecepatan Serangan', icon:'⚡', desc:'+25% attack speed', rarity:'epic', apply:()=>{player.fireRateMult *= 1.25}},
+            {id:'explosive_kills', name:'Ledakan Tiap Kill', icon:'💥', desc:'Ledakan lebih besar', rarity:'legendary', apply:()=>{player.explosiveKills = true; player.explosionRadius = (player.explosionRadius||50)+20}},
+            // Transcendent Sword
+            {id:'transcendent_sword', name:'Pedang Transenden', icon:'⚔️', desc:'Pedang raksasa AOE setiap 15 detik. Evolusi 3x: radius 1 layar', rarity:'transcendent', apply:()=>{
+                player.transcendentSword = true;
+                player.transcendentCooldown = 0;
+                const currentCount = player.upgradeCounts['transcendent_sword'] || 0;
+                if (currentCount >= 2 && !player.transcendentSwordEvolved) {
+                    player.transcendentSwordEvolved = true;
+                    player.transcendentSwordRadius = Math.max(window.innerWidth, window.innerHeight);
+                    player.transcendentSwordDamage = 400;
+                    const alert = document.getElementById('disaster-alert');
+                    alert.textContent = '✨ EVOLUSI PEDANG TRANSENDEN! ✨';
+                    alert.style.color = '#ffd700';
+                    alert.style.display = 'block';
+                    setTimeout(() => alert.style.display = 'none', 3000);
+                    evoSnd();
+                } else {
+                    player.transcendentSwordRadius = player.transcendentSwordRadius || 300;
+                    player.transcendentSwordDamage = player.transcendentSwordDamage || 200;
+                }
+            }},
+        ];
 
-    function getRandomUpgrades(level) {
-        let pool = upgradePool.filter(u => !u.milestoneOnly);
-        if (level >= 100) pool = pool.filter(u => u.rarity !== 'common');
-        if (milestoneLevels.includes(level)) pool = upgradePool.filter(u => u.rarity === 'legendary' || u.rarity === 'epic' || u.rarity === 'mythic' || u.rarity === 'transcendent');
-        return [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
-    }
+        function getRandomUpgrades(level) {
+            let pool = upgradePool.filter(u => !u.milestoneOnly);
+            if (level >= 100) pool = pool.filter(u => u.rarity !== 'common');
+            if (milestoneLevels.includes(level)) pool = upgradePool.filter(u => u.rarity === 'legendary' || u.rarity === 'epic' || u.rarity === 'mythic' || u.rarity === 'transcendent');
+            return [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
+        }
 
-    // ==================== PLAYER ====================
-    const player = {
-        x: worldSize/2, y: worldSize/2, radius: 16, hp: 100, maxHp: 100,
-        baseSpeedMult: 1, speedMult: 1, slowFactor: 1, slowTimer: 0, baseSpeed: 220,
-        damageMult: 1, fireRateMult: 1, baseFireRate: 2.5, projectileCount: 1,
-        pierce: 0, magnetMult: 1, baseMagnet: 120, critChance: 0.05, hpRegen: 0,
-        throwingKnives: 0, throwingKnifeCooldown: 0, lightningEnabled: false, lightningCooldown: 0,
-        fireCooldown: 0, invincible: 0, fireAura: false, fireAuraDamage: 5, lifesteal: 0,
-        energyShield: false, thornsDamage: 0, poisonDamage: 0, poisonAura: false, poisonAuraRadius: 100,
-        reflectShield: false, reflectPercent: 0.3, chainLightning: false, chainCount: 2,
-        xpSteal: 0, explosiveKills: false, explosionRadius: 50, bossDamageMult: 1, shieldCooldown: 0,
-        upgradeCounts: {}, xpGainMult: 1, laserOrbital: false, laserCooldown: 0, laserAngle: 0,
-        droneCount: 0, droneCooldown: 0, droneFireRate: 1.5,
-        planeEnabled: false, planeCooldown: 0, planeDoubleBomb: false,
-        bombEnabled: false, bombCooldown: 0, bombRadius: 120, bombDouble: false,
-        tornadoEnabled: false, tornadoCooldown: 0, tornadoActive: false, tornadoTimer: 0,
-        tornadoX: 0, tornadoY: 0, tornadoRadius: 150, tornadoDamage: 20, tornadoPull: 100, tornadoDuration: 5,
-        // Transendent
-        transcendentSword: false, transcendentCooldown: 0, transcendentSwordActive: false, transcendentSwordTimer: 0,
-        transcendentSwordX: 0, transcendentSwordY: 0, transcendentSwordRadius: 300, transcendentSwordDamage: 200,
-        transcendentSwordEvolved: false
-    };
-
-    function resetPlayer() {
-        Object.assign(player, {
-            x: worldSize/2, y: worldSize/2, hp: 100, maxHp: 100,
-            baseSpeedMult: 1, speedMult: 1, slowFactor: 1, slowTimer: 0,
-            damageMult: 1, fireRateMult: 1, projectileCount: 1, pierce: 0,
-            magnetMult: 1, critChance: 0.05, hpRegen: 0, throwingKnives: 0,
-            lightningEnabled: false, lightningCooldown: 0, fireCooldown: 0, invincible: 0,
-            fireAura: false, fireAuraDamage: 5, lifesteal: 0, energyShield: false,
-            thornsDamage: 0, poisonDamage: 0, poisonAura: false, poisonAuraRadius: 100,
+        // ==================== PLAYER ====================
+        const player = {
+            x: worldSize/2, y: worldSize/2, radius: 16, hp: 100, maxHp: 100,
+            baseSpeedMult: 1, speedMult: 1, slowFactor: 1, slowTimer: 0, baseSpeed: 220,
+            damageMult: 1, fireRateMult: 1, baseFireRate: 2.5, projectileCount: 1,
+            pierce: 0, magnetMult: 1, baseMagnet: 120, critChance: 0.05, hpRegen: 0,
+            throwingKnives: 0, throwingKnifeCooldown: 0, lightningEnabled: false, lightningCooldown: 0,
+            fireCooldown: 0, invincible: 0, fireAura: false, fireAuraDamage: 5, lifesteal: 0,
+            energyShield: false, thornsDamage: 0, poisonDamage: 0, poisonAura: false, poisonAuraRadius: 100,
             reflectShield: false, reflectPercent: 0.3, chainLightning: false, chainCount: 2,
-            xpSteal: 0, explosiveKills: false, explosionRadius: 50,
-            bossDamageMult: 1, shieldCooldown: 0, upgradeCounts: {}, xpGainMult: 1,
-            laserOrbital: false, laserCooldown: 0, laserAngle: 0,
+            xpSteal: 0, explosiveKills: false, explosionRadius: 50, bossDamageMult: 1, shieldCooldown: 0,
+            upgradeCounts: {}, xpGainMult: 1, laserOrbital: false, laserCooldown: 0, laserAngle: 0,
             droneCount: 0, droneCooldown: 0, droneFireRate: 1.5,
             planeEnabled: false, planeCooldown: 0, planeDoubleBomb: false,
             bombEnabled: false, bombCooldown: 0, bombRadius: 120, bombDouble: false,
             tornadoEnabled: false, tornadoCooldown: 0, tornadoActive: false, tornadoTimer: 0,
             tornadoX: 0, tornadoY: 0, tornadoRadius: 150, tornadoDamage: 20, tornadoPull: 100, tornadoDuration: 5,
+            // Transendent
             transcendentSword: false, transcendentCooldown: 0, transcendentSwordActive: false, transcendentSwordTimer: 0,
             transcendentSwordX: 0, transcendentSwordY: 0, transcendentSwordRadius: 300, transcendentSwordDamage: 200,
             transcendentSwordEvolved: false
-        });
-    }
+        };
 
-    // ==================== ENTITIES ====================
-    let enemies = [], projectiles = [], particles = [], xpOrbs = [], damageTexts = [], lightningBolts = [], backgroundStars = [], bosses = [], finalBosses = [], disasters = [], areaEffects = [], bombs = [];
-
-    function initStars() {
-        backgroundStars = [];
-        for (let i = 0; i < 1000; i++) backgroundStars.push({ x: Math.random() * worldSize, y: Math.random() * worldSize, r: Math.random() * 1.8 + 0.5, a: Math.random() * 0.6 + 0.2, twinkle: Math.random() * 6 });
-    }
-    initStars();
-
-    const enemyTypes = [
-        {type:'basic', hp:30, speed:60, radius:14, color:'#e74c3c', glow:'#ff5555', score:1, damage:8, xpValue:4},
-        {type:'fast', hp:15, speed:75, radius:10, color:'#f39c12', glow:'#ffaa00', score:1, damage:5, xpValue:2},
-        {type:'tank', hp:90, speed:30, radius:22, color:'#8e44ad', glow:'#bb66ff', score:3, damage:15, xpValue:10},
-        {type:'brute', hp:50, speed:50, radius:18, color:'#e67e22', glow:'#ff8844', score:2, damage:10, xpValue:6}
-    ];
-    const bossTypes = [
-        {type:'water', name:'RAJA AIR', hp:500, speed:50, radius:40, color:'#0066cc', glow:'#00aaff', damage:18, element:'💧'},
-        {type:'earth', name:'RAJA TANAH', hp:700, speed:35, radius:50, color:'#8b4513', glow:'#b8860b', damage:22, element:'🪨'},
-        {type:'ice', name:'RAJA ES', hp:450, speed:55, radius:38, color:'#87ceeb', glow:'#add8e6', damage:16, element:'❄️'},
-        {type:'nature', name:'RAJA ALAM', hp:550, speed:48, radius:42, color:'#228b22', glow:'#32cd32', damage:20, element:'🌿'},
-        {type:'lightning', name:'RAJA PETIR', hp:400, speed:70, radius:35, color:'#ffcc00', glow:'#ffff00', damage:24, element:'⚡'}
-    ];
-    const finalBossBase = { hp:2000, speed:40, radius:60, damage:30, color:'#4b0082', glow:'#ff00ff', name:'RAJA KEGELAPAN', element:'👿' };
-
-    // ==================== GAME FUNCTIONS ====================
-    function spawnFinalBoss() {
-        if (!gameRunning || gamePaused) return;
-        const scale = 1 + Math.floor(gameTime/300) * 0.5;
-        finalBosses.push({ ...finalBossBase, hp: finalBossBase.hp * scale, maxHp: finalBossBase.hp * scale, speed: finalBossBase.speed * (1 + scale * 0.2), damage: finalBossBase.damage * scale, x: player.x + 400, y: player.y + 400 });
-        const alert = document.getElementById('disaster-alert'); alert.textContent = '👿 RAJA KEGELAPAN MUNCUL!'; alert.style.color = '#ff00ff'; alert.style.display = 'block'; setTimeout(() => alert.style.display = 'none', 3000); finalBossSnd();
-    }
-    function spawnBoss() {
-        if (!gameRunning || gamePaused) return;
-        const type = bossTypes[Math.floor(Math.random() * bossTypes.length)];
-        const angle = Math.random() * Math.PI * 2, dist = 600;
-        let x = player.x + Math.cos(angle) * dist, y = player.y + Math.sin(angle) * dist;
-        x = Math.max(100, Math.min(worldSize - 100, x)); y = Math.max(100, Math.min(worldSize - 100, y));
-        const hpScale = 1 + gameTime * 0.05;
-        bosses.push({ x, y, hp: type.hp * hpScale, maxHp: type.hp * hpScale, radius: type.radius, speed: type.speed, color: type.color, glow: type.glow, damage: type.damage, name: type.name, element: type.element, type: type.type, hitFlash: 0, wobble: Math.random() * 6.28, attackCooldown: 2, skillCooldown: 3 });
-        const alert = document.getElementById('disaster-alert'); alert.textContent = type.element + ' ' + type.name + ' MUNCUL!'; alert.style.color = type.glow; alert.style.display = 'block'; setTimeout(() => alert.style.display = 'none', 3000);
-    }
-    function triggerDisaster() {
-        const types = ['meteor','earthquake','blizzard','lightningstorm','tsunami'];
-        const type = types[Math.floor(Math.random() * types.length)];
-        const alert = document.getElementById('disaster-alert'); alert.style.display = 'block';
-        if (type === 'meteor') { alert.textContent = '☄️ HUJAN METEOR!'; alert.style.color = '#ff6600'; disasters.push({type:'meteor', timer:8, interval:0.5}); }
-        else if (type === 'earthquake') { alert.textContent = '🌋 GEMPA BUMI!'; alert.style.color = '#b8860b'; screenShake = 15; disasters.push({type:'earthquake', timer:6}); }
-        else if (type === 'blizzard') { alert.textContent = '❄️ BADAI SALJU!'; alert.style.color = '#add8e6'; disasters.push({type:'blizzard', timer:10}); }
-        else if (type === 'lightningstorm') { alert.textContent = '⚡ BADAI PETIR!'; alert.style.color = '#ffff00'; disasters.push({type:'lightningstorm', timer:8, interval:1}); }
-        else if (type === 'tsunami') { alert.textContent = '🌊 TSUNAMI DATANG!'; alert.style.color = '#00aaff'; const startX = player.x - 600; disasters.push({type:'tsunami', timer:12, waveX:startX, speed:150, width:400, damage:15, hitPlayer:false}); }
-        setTimeout(() => alert.style.display = 'none', 2000);
-    }
-    function spawnEnemy() {
-        if (!gameRunning || gamePaused) return;
-        const angle = Math.random() * Math.PI * 2, dist = 500 + Math.random() * 400;
-        let x = player.x + Math.cos(angle) * dist, y = player.y + Math.sin(angle) * dist;
-        x = Math.max(50, Math.min(worldSize - 50, x)); y = Math.max(50, Math.min(worldSize - 50, y));
-        const r = Math.random(); let ti = 0, c = 0;
-        for (let i = 0; i < enemyTypes.length; i++) { c += [0.45,0.25,0.18,0.12][i]; if (r < c) { ti = i; break; } }
-        const t = enemyTypes[ti];
-        const hpM = 1 + gameTime * 0.08; // Faktor skala HP
-        const speedM = 1 + gameTime * 0.005;
-        const xpMultiplier = 1 + hpM * 0.5; // EXP naik lebih cepat seiring HP
-        const baseXp = t.xpValue;
-        enemies.push({
-            x, y,
-            hp: t.hp * hpM,
-            maxHp: t.hp * hpM,
-            radius: t.radius * (1 + Math.min(gameTime * 0.01, 0.5)),
-            speed: t.speed * speedM,
-            color: t.color,
-            glow: t.glow,
-            score: t.score,
-            xpValue: Math.floor(baseXp * xpMultiplier),
-            damage: t.damage,
-            type: t.type,
-            hitFlash: 0,
-            wobble: Math.random() * 6.28,
-            slowed: 0,
-            slowTimer: 0,
-            poisoned: 0,
-            poisonTimer: 0
-        });
-    }
-    function fireProjectile() {
-        const target = findNearestEnemy(); if (!target) return;
-        const angle = Math.atan2(target.y - player.y, target.x - player.x);
-        const count = player.projectileCount;
-        for (let i = 0; i < count; i++) {
-            const off = (i - (count - 1) / 2) * 0.12, fa = angle + off;
-            projectiles.push({ x: player.x, y: player.y, vx: Math.cos(fa) * 520, vy: Math.sin(fa) * 520, damage: 10 * player.damageMult, pierce: player.pierce, hitEnemies: new Set(), radius: 5, color: '#00f0ff', glow: '#00aaff', life: 1.8 });
-        }
-        shootSnd();
-    }
-    function findNearestEnemy() {
-        let n = null, m = Infinity;
-        for (const e of enemies) { const d = (e.x - player.x) ** 2 + (e.y - player.y) ** 2; if (d < m) { m = d; n = e; } }
-        for (const b of bosses) { const d = (b.x - player.x) ** 2 + (b.y - player.y) ** 2; if (d < m) { m = d; n = b; } }
-        for (const fb of finalBosses) { const d = (fb.x - player.x) ** 2 + (fb.y - player.y) ** 2; if (d < m) { m = d; n = fb; } }
-        return n;
-    }
-    function spawnParticles(x, y, color, count, speed = 150, life = 0.6, size = 4) {
-        for (let i = 0; i < count; i++) {
-            const a = Math.random() * 6.28, sp = Math.random() * speed + speed * 0.3;
-            particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: Math.random() * life + life * 0.5, maxLife: life * 1.5, radius: Math.random() * size + 1, color, glow: true });
-        }
-    }
-    function spawnXpOrb(x, y, value = 3) { xpOrbs.push({ x, y, value, radius: 6, attracted: false, vx: (Math.random() - 0.5) * 60, vy: (Math.random() - 0.5) * 60 }); }
-    function spawnDamageText(x, y, text, color = '#fff') { damageTexts.push({ x: x + (Math.random() - 0.5) * 20, y: y - 10, text, color, life: 0.8, maxLife: 0.8, vy: -60 }); }
-    function spawnLightningBolt(target) {
-        const pts = [], steps = 12;
-        for (let i = 0; i <= steps; i++) {
-            const t = i / steps, j = (Math.random() - 0.5) * 40 * (i < steps ? 1 : 0.3), px = -(target.y - player.y), py = (target.x - player.x), l = Math.sqrt(px * px + py * py) || 1;
-            pts.push({ x: player.x + (target.x - player.x) * t + (px / l) * j, y: player.y + (target.y - player.y) * t + (py / l) * j });
-        }
-        lightningBolts.push({ points: pts, life: 0.25, maxLife: 0.25, target });
-        const dmg = 30 * player.damageMult; if (target.hp !== undefined) damageEnemy(target, dmg, true);
-        spawnParticles(target.x, target.y, '#ffff00', 10, 120, 0.4, 3);
-    }
-    function spawnBomb(x, y, radius = 120) { bombs.push({ x, y, radius, timer: 1.5, maxTimer: 1.5 }); snd(800, 100, 0.3, 'square', 0.1); }
-    function explodeBomb(b) {
-        spawnParticles(b.x, b.y, '#ff4400', 40, 300, 0.8, 8); spawnParticles(b.x, b.y, '#ffaa00', 30, 200, 0.6, 6);
-        screenShake = Math.max(screenShake, 10);
-        for (const e of enemies) if (Math.sqrt((e.x - b.x) ** 2 + (e.y - b.y) ** 2) < b.radius) damageEnemy(e, 80 * player.damageMult);
-        for (const bo of bosses) if (Math.sqrt((bo.x - b.x) ** 2 + (bo.y - b.y) ** 2) < b.radius) damageEnemy(bo, 100 * player.damageMult);
-        for (const fb of finalBosses) if (Math.sqrt((fb.x - b.x) ** 2 + (fb.y - b.y) ** 2) < b.radius) damageEnemy(fb, 100 * player.damageMult);
-        bombSnd();
-    }
-    function damageEnemy(e, d, crit = false) {
-        e.hp -= d; e.hitFlash = 0.15; spawnDamageText(e.x, e.y, Math.round(d), crit ? '#ffd700' : '#fff');
-        if (crit) spawnParticles(e.x, e.y, '#ffd700', 3, 80, 0.3, 3);
-        if (e.hp <= 0) killEnemy(e);
-    }
-    function killEnemy(e) {
-        const i = enemies.indexOf(e); if (i > -1) enemies.splice(i, 1);
-        const bi = bosses.indexOf(e);
-        if (bi > -1) {
-            bosses.splice(bi, 1); bossesKilled++; document.getElementById('go-bosses').textContent = bossesKilled;
-            document.getElementById('boss-bar-container').style.display = 'none';
-            spawnParticles(e.x, e.y, e.glow, 40, 300, 1, 8); spawnXpOrb(e.x, e.y, 150);
-            level += 3; xpToNext = Math.floor(10 * Math.pow(1.1, level - 1));
-            updateLevelUI(); updateXPUI();
-            pendingUpgrades += 3; showUpgradeScreen();
-        } else if (finalBosses.indexOf(e) > -1) {
-            const fi = finalBosses.indexOf(e); finalBosses.splice(fi, 1);
-            document.getElementById('final-boss-bar-container').style.display = 'none';
-            spawnParticles(e.x, e.y, e.glow, 80, 500, 1.5, 10); spawnXpOrb(e.x, e.y, 200);
-            level += 3; xpToNext = Math.floor(10 * Math.pow(1.1, level - 1));
-            updateLevelUI(); updateXPUI();
-            pendingUpgrades += 3; showUpgradeScreen();
-        } else {
-            kills += e.score; spawnParticles(e.x, e.y, e.glow, 18, 200, 0.7, 5); spawnXpOrb(e.x, e.y, e.xpValue || 1);
-            if (player.lifesteal > 0) { player.hp = Math.min(player.maxHp, player.hp + player.lifesteal); updateHealthUI(); }
-            if (player.xpSteal > 0) gainXP(player.xpSteal);
-            if (player.explosiveKills) { spawnParticles(e.x, e.y, '#ff4400', 20, 200, 0.4, 4); for (const en of enemies) if (en !== e && Math.sqrt((en.x - e.x) ** 2 + (en.y - e.y) ** 2) < player.explosionRadius) damageEnemy(en, 30); }
-        }
-        expSnd(); updateKillUI();
-    }
-    function damagePlayer(a) {
-        if (player.invincible > 0) return;
-        if (player.energyShield && player.shieldCooldown <= 0) { player.shieldCooldown = 5; return; }
-        if (player.reflectShield) for (const en of enemies) if (Math.sqrt((en.x - player.x) ** 2 + (en.y - player.y) ** 2) < 100) damageEnemy(en, a * player.reflectPercent);
-        a *= player.damageReduction || 1; player.hp -= a; player.invincible = 0.3; screenShake = Math.max(screenShake, 6);
-        spawnParticles(player.x, player.y, '#ff3b6b', 12, 180, 0.5, 4);
-        if (player.hp <= 0) { player.hp = 0; gameOver(); }
-        updateHealthUI();
-    }
-    function updateHealthUI() { const p = Math.max(0, (player.hp / player.maxHp) * 100); document.getElementById('health-bar-fill').style.width = p + '%'; document.getElementById('health-text').textContent = Math.ceil(player.hp) + ' / ' + player.maxHp; }
-    function updateXPUI() { const p = Math.min(100, (xp / xpToNext) * 100); document.getElementById('xp-bar-fill').style.width = p + '%'; document.getElementById('xp-text').textContent = 'XP: ' + Math.floor(xp) + ' / ' + xpToNext; }
-    function updateKillUI() { document.getElementById('kill-num').textContent = kills; }
-    function updateLevelUI() { document.getElementById('level-num').textContent = level; }
-    function updateTimerUI() { const m = Math.floor(gameTime / 60), s = Math.floor(gameTime % 60); document.getElementById('time-min').textContent = String(m).padStart(2, '0'); document.getElementById('time-sec').textContent = String(s).padStart(2, '0'); }
-    function updateBestRecordUI() { document.getElementById('best-time').textContent = String(Math.floor(bestTime / 60)).padStart(2, '0') + ':' + String(bestTime % 60).padStart(2, '0'); document.getElementById('best-kills').textContent = bestKills; }
-    function gainXP(a) {
-        a *= player.xpGainMult || 1; xp += a;
-        while (xp >= xpToNext) { xp -= xpToNext; level++; xpToNext = Math.floor(10 * Math.pow(1.1, level - 1)); updateLevelUI(); updateXPUI(); showUpgradeScreen(); levelSnd(); }
-        updateXPUI();
-    }
-    function showUpgradeScreen() {
-        gamePaused = true;
-        const overlay = document.getElementById('upgrade-overlay'), panel = document.getElementById('upgrade-panel');
-        panel.innerHTML = '';
-        const isMs = milestoneLevels.includes(level);
-        getRandomUpgrades(level).forEach(upg => {
-            const card = document.createElement('div'); card.className = 'upgrade-card';
-            if (isMs) card.classList.add('milestone-card');
-            if (isMs) { const badge = document.createElement('span'); badge.className = 'milestone-badge'; badge.textContent = 'MILESTONE'; card.appendChild(badge); }
-            card.innerHTML = `<span class="rarity rarity-${upg.rarity}">${upg.rarity}</span><div class="icon">${upg.icon}</div><h3>${upg.name}</h3><p>${upg.desc}</p>`;
-            const count = player.upgradeCounts[upg.id] || 0;
-            if (count > 0) { const badge = document.createElement('span'); badge.className = 'upgrade-count-badge'; badge.textContent = count + 'x'; card.appendChild(badge); }
-            const tier = Math.floor(count / 10); if (tier > 0) card.classList.add('tier-' + Math.min(tier, 10));
-            card.addEventListener('click', () => {
-                upg.apply(); player.upgradeCounts[upg.id] = (player.upgradeCounts[upg.id] || 0) + 1;
-                overlay.classList.remove('active'); gamePaused = false;
-                if (upg.id === 'maxhp' || upg.id === 'heal') updateHealthUI();
-                if (pendingUpgrades > 0) { pendingUpgrades--; showUpgradeScreen(); }
+        function resetPlayer() {
+            Object.assign(player, {
+                x: worldSize/2, y: worldSize/2, hp: 100, maxHp: 100,
+                baseSpeedMult: 1, speedMult: 1, slowFactor: 1, slowTimer: 0,
+                damageMult: 1, fireRateMult: 1, projectileCount: 1, pierce: 0,
+                magnetMult: 1, critChance: 0.05, hpRegen: 0, throwingKnives: 0,
+                lightningEnabled: false, lightningCooldown: 0, fireCooldown: 0, invincible: 0,
+                fireAura: false, fireAuraDamage: 5, lifesteal: 0, energyShield: false,
+                thornsDamage: 0, poisonDamage: 0, poisonAura: false, poisonAuraRadius: 100,
+                reflectShield: false, reflectPercent: 0.3, chainLightning: false, chainCount: 2,
+                xpSteal: 0, explosiveKills: false, explosionRadius: 50,
+                bossDamageMult: 1, shieldCooldown: 0, upgradeCounts: {}, xpGainMult: 1,
+                laserOrbital: false, laserCooldown: 0, laserAngle: 0,
+                droneCount: 0, droneCooldown: 0, droneFireRate: 1.5,
+                planeEnabled: false, planeCooldown: 0, planeDoubleBomb: false,
+                bombEnabled: false, bombCooldown: 0, bombRadius: 120, bombDouble: false,
+                tornadoEnabled: false, tornadoCooldown: 0, tornadoActive: false, tornadoTimer: 0,
+                tornadoX: 0, tornadoY: 0, tornadoRadius: 150, tornadoDamage: 20, tornadoPull: 100, tornadoDuration: 5,
+                transcendentSword: false, transcendentCooldown: 0, transcendentSwordActive: false, transcendentSwordTimer: 0,
+                transcendentSwordX: 0, transcendentSwordY: 0, transcendentSwordRadius: 300, transcendentSwordDamage: 200,
+                transcendentSwordEvolved: false
             });
-            card.addEventListener('touchstart', e => { e.preventDefault(); upg.apply(); player.upgradeCounts[upg.id] = (player.upgradeCounts[upg.id] || 0) + 1; overlay.classList.remove('active'); gamePaused = false; if (upg.id === 'maxhp' || upg.id === 'heal') updateHealthUI(); if (pendingUpgrades > 0) { pendingUpgrades--; showUpgradeScreen(); } });
-            panel.appendChild(card);
-        });
-        overlay.classList.add('active');
-    }
-    function gameOver() {
-        gameRunning = false; gamePaused = false;
-        document.getElementById('game-over-overlay').classList.add('active');
-        document.getElementById('go-time').textContent = String(Math.floor(gameTime / 60)).padStart(2, '0') + ':' + String(Math.floor(gameTime % 60)).padStart(2, '0');
-        document.getElementById('go-kills').textContent = kills; document.getElementById('go-level').textContent = level;
-        if (kills > bestKills) { bestKills = kills; localStorage.setItem('survivor_best_kills', bestKills); }
-        if (Math.floor(gameTime) > bestTime) { bestTime = Math.floor(gameTime); localStorage.setItem('survivor_best_time', bestTime); }
-        updateBestRecordUI();
-    }
-
-    function togglePause() {
-        if (!gameRunning) return;
-        gamePaused = !gamePaused;
-        document.getElementById('pause-btn').textContent = gamePaused ? '▶️' : '⏸️';
-    }
-
-    const keys = {}; addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key === 'ArrowUp') keys['w'] = true; if (e.key === 'ArrowDown') keys['s'] = true; if (e.key === 'ArrowLeft') keys['a'] = true; if (e.key === 'ArrowRight') keys['d'] = true; });
-    addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; if (e.key === 'ArrowUp') keys['w'] = false; if (e.key === 'ArrowDown') keys['s'] = false; if (e.key === 'ArrowLeft') keys['a'] = false; if (e.key === 'ArrowRight') keys['d'] = false; });
-    let touchX = null, touchY = null; canvas.addEventListener('touchstart', e => { e.preventDefault(); const t = e.touches[0]; touchX = t.clientX; touchY = t.clientY; });
-    canvas.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; touchX = t.clientX; touchY = t.clientY; }); canvas.addEventListener('touchend', () => { touchX = null; touchY = null; });
-    let mDown = false; canvas.addEventListener('mousedown', e => { mDown = true; mouseX = e.clientX; mouseY = e.clientY; touchX = e.clientX; touchY = e.clientY; });
-    canvas.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; if (mDown) { touchX = e.clientX; touchY = e.clientY; } }); canvas.addEventListener('mouseup', () => { mDown = false; touchX = null; touchY = null; });
-
-    window.startGame = function () {
-        initAudio(); document.getElementById('start-overlay').classList.add('hidden');
-        gameRunning = true; gamePaused = false; gameTime = 0; kills = 0; level = 1; xp = 0; xpToNext = 20; bossesKilled = 0; pendingUpgrades = 0;
-        resetPlayer(); enemies = []; projectiles = []; particles = []; xpOrbs = []; damageTexts = []; lightningBolts = []; bosses = []; finalBosses = []; disasters = []; areaEffects = []; bombs = []; screenShake = 0;
-        updateHealthUI(); updateXPUI(); updateKillUI(); updateLevelUI(); updateTimerUI(); updateBestRecordUI();
-        document.getElementById('go-bosses').textContent = '0'; document.getElementById('game-over-overlay').classList.remove('active'); document.getElementById('upgrade-overlay').classList.remove('active');
-        document.getElementById('boss-bar-container').style.display = 'none'; document.getElementById('final-boss-bar-container').style.display = 'none';
-        document.getElementById('pause-btn').textContent = '⏸️';
-    };
-    window.restartGame = () => window.startGame();
-
-    let enemySpawnTimer = 0, bossSpawnTimer = 45, disasterTimer = 30, finalBossTimer = 300;
-
-    function update(dt) {
-        if (!gameRunning || gamePaused) return;
-        gameTime += dt; updateTimerUI(); if (player.shieldCooldown > 0) player.shieldCooldown -= dt;
-        if (player.slowTimer > 0) { player.slowTimer -= dt; if (player.slowTimer <= 0) player.slowFactor = 1; }
-        player.speedMult = player.baseSpeedMult * player.slowFactor;
-        if (player.hpRegen > 0) { player.hp = Math.min(player.maxHp, player.hp + player.hpRegen * dt); updateHealthUI(); }
-        if (player.invincible > 0) player.invincible -= dt;
-        let dx = 0, dy = 0; if (keys['w']) dy = -1; if (keys['s']) dy = 1; if (keys['a']) dx = -1; if (keys['d']) dx = 1;
-        if (touchX !== null && touchY !== null) { const cx = touchX - W / 2, cy = touchY - H / 2, l = Math.sqrt(cx * cx + cy * cy); if (l > 30) { dx = cx / l; dy = cy / l; } }
-        if (dx !== 0 || dy !== 0) { const l = Math.sqrt(dx * dx + dy * dy); player.x += dx / l * player.baseSpeed * player.speedMult * dt; player.y += dy / l * player.baseSpeed * player.speedMult * dt; }
-        player.x = Math.max(player.radius, Math.min(worldSize - player.radius, player.x)); player.y = Math.max(player.radius, Math.min(worldSize - player.radius, player.y));
-        const efr = player.baseFireRate * player.fireRateMult; player.fireCooldown -= dt; if (player.fireCooldown <= 0 && (enemies.length > 0 || bosses.length > 0 || finalBosses.length > 0)) { fireProjectile(); player.fireCooldown = 1 / efr; }
-        if (player.lightningEnabled) { player.lightningCooldown -= dt; if (player.lightningCooldown <= 0) { const targets = enemies.length > 0 ? enemies : bosses.length > 0 ? bosses : finalBosses; if (targets.length > 0) { const t = targets[Math.floor(Math.random() * targets.length)]; spawnLightningBolt(t); if (player.chainLightning) { let extra = player.chainCount; for (const e of enemies) if (e !== t && extra > 0 && Math.abs(e.x - t.x) < 200) { spawnLightningBolt(e); extra--; } } } player.lightningCooldown = Math.max(1, player.lightningCooldown); } }
-        if (player.throwingKnives > 0) { player.throwingKnifeCooldown -= dt; if (player.throwingKnifeCooldown <= 0) { player.throwingKnifeCooldown = 1; const target = findNearestEnemy(); if (target) { const angle = Math.atan2(target.y - player.y, target.x - player.x); for (let i = 0; i < player.throwingKnives; i++) { const spread = (i - (player.throwingKnives - 1) / 2) * 0.2, fa = angle + spread; projectiles.push({ x: player.x, y: player.y, vx: Math.cos(fa) * 600, vy: Math.sin(fa) * 600, damage: 25 * player.damageMult, pierce: 0, hitEnemies: new Set(), radius: 7, color: '#c86bff', glow: '#c86bff', life: 1.5, type: 'knife' }); } spawnParticles(player.x, player.y, '#c86bff', 5, 80, 0.2, 2); } } }
-        // Tornado
-        if (player.tornadoEnabled) {
-            if (!player.tornadoActive) { player.tornadoCooldown -= dt; if (player.tornadoCooldown <= 0) { player.tornadoActive = true; player.tornadoTimer = player.tornadoDuration; player.tornadoX = player.x; player.tornadoY = player.y; player.tornadoCooldown = 15; tornadoSnd(); } }
-            else { player.tornadoTimer -= dt; if (player.tornadoTimer <= 0) player.tornadoActive = false; else { for (const e of enemies) { const dx = e.x - player.tornadoX, dy = e.y - player.tornadoY, dist = Math.sqrt(dx * dx + dy * dy); if (dist < player.tornadoRadius) { damageEnemy(e, player.tornadoDamage * dt); if (dist > 5) { const pull = player.tornadoPull * dt * (1 - dist / player.tornadoRadius); e.x -= (dx / dist) * pull; e.y -= (dy / dist) * pull; } } } } }
         }
-        // Transcendent Sword
-        if (player.transcendentSword) {
-            if (!player.transcendentSwordActive) {
-                player.transcendentCooldown -= dt;
-                if (player.transcendentCooldown <= 0) {
-                    player.transcendentSwordActive = true;
-                    player.transcendentSwordTimer = 1;
-                    const target = findNearestEnemy();
-                    if (target) { player.transcendentSwordX = target.x; player.transcendentSwordY = target.y; }
-                    else { player.transcendentSwordX = player.x; player.transcendentSwordY = player.y; }
-                    player.transcendentCooldown = 15;
-                    transcendentSnd();
-                }
-            } else {
-                player.transcendentSwordTimer -= dt;
-                if (player.transcendentSwordTimer <= 0) {
-                    player.transcendentSwordActive = false;
-                    const sx = player.transcendentSwordX, sy = player.transcendentSwordY;
-                    const radius = player.transcendentSwordRadius;
-                    const damage = player.transcendentSwordDamage * player.damageMult;
-                    for (const e of enemies) if (Math.sqrt((e.x - sx) ** 2 + (e.y - sy) ** 2) < radius) damageEnemy(e, damage);
-                    for (const b of bosses) if (Math.sqrt((b.x - sx) ** 2 + (b.y - sy) ** 2) < radius) damageEnemy(b, damage * 0.7);
-                    for (const fb of finalBosses) if (Math.sqrt((fb.x - sx) ** 2 + (fb.y - sy) ** 2) < radius) damageEnemy(fb, damage * 0.7);
-                    spawnParticles(sx, sy, '#ffd700', 50, 300, 0.8, 8);
-                    screenShake = Math.max(screenShake, 15);
-                }
+
+        // ==================== ENTITIES ====================
+        let enemies = [], projectiles = [], particles = [], xpOrbs = [], damageTexts = [], lightningBolts = [], backgroundStars = [], bosses = [], finalBosses = [], disasters = [], areaEffects = [], bombs = [];
+
+        function initStars() {
+            backgroundStars = [];
+            for (let i = 0; i < 1000; i++) backgroundStars.push({ x: Math.random() * worldSize, y: Math.random() * worldSize, r: Math.random() * 1.8 + 0.5, a: Math.random() * 0.6 + 0.2, twinkle: Math.random() * 6 });
+        }
+        initStars();
+
+        const enemyTypes = [
+            {type:'basic', hp:30, speed:60, radius:14, color:'#e74c3c', glow:'#ff5555', score:1, damage:8, xpValue:4},
+            {type:'fast', hp:15, speed:75, radius:10, color:'#f39c12', glow:'#ffaa00', score:1, damage:5, xpValue:2},
+            {type:'tank', hp:90, speed:30, radius:22, color:'#8e44ad', glow:'#bb66ff', score:3, damage:15, xpValue:10},
+            {type:'brute', hp:50, speed:50, radius:18, color:'#e67e22', glow:'#ff8844', score:2, damage:10, xpValue:6}
+        ];
+        const bossTypes = [
+            {type:'water', name:'RAJA AIR', hp:500, speed:50, radius:40, color:'#0066cc', glow:'#00aaff', damage:18, element:'💧'},
+            {type:'earth', name:'RAJA TANAH', hp:700, speed:35, radius:50, color:'#8b4513', glow:'#b8860b', damage:22, element:'🪨'},
+            {type:'ice', name:'RAJA ES', hp:450, speed:55, radius:38, color:'#87ceeb', glow:'#add8e6', damage:16, element:'❄️'},
+            {type:'nature', name:'RAJA ALAM', hp:550, speed:48, radius:42, color:'#228b22', glow:'#32cd32', damage:20, element:'🌿'},
+            {type:'lightning', name:'RAJA PETIR', hp:400, speed:70, radius:35, color:'#ffcc00', glow:'#ffff00', damage:24, element:'⚡'}
+        ];
+        const finalBossBase = { hp:2000, speed:40, radius:60, damage:30, color:'#4b0082', glow:'#ff00ff', name:'RAJA KEGELAPAN', element:'👿' };
+
+        // ==================== GAME FUNCTIONS ====================
+        function spawnFinalBoss() {
+            if (!gameRunning || gamePaused) return;
+            const scale = 1 + Math.floor(gameTime/300) * 0.5;
+            finalBosses.push({ ...finalBossBase, hp: finalBossBase.hp * scale, maxHp: finalBossBase.hp * scale, speed: finalBossBase.speed * (1 + scale * 0.2), damage: finalBossBase.damage * scale, x: player.x + 400, y: player.y + 400 });
+            const alert = document.getElementById('disaster-alert'); alert.textContent = '👿 RAJA KEGELAPAN MUNCUL!'; alert.style.color = '#ff00ff'; alert.style.display = 'block'; setTimeout(() => alert.style.display = 'none', 3000); finalBossSnd();
+        }
+        function spawnBoss() {
+            if (!gameRunning || gamePaused) return;
+            const type = bossTypes[Math.floor(Math.random() * bossTypes.length)];
+            const angle = Math.random() * Math.PI * 2, dist = 600;
+            let x = player.x + Math.cos(angle) * dist, y = player.y + Math.sin(angle) * dist;
+            x = Math.max(100, Math.min(worldSize - 100, x)); y = Math.max(100, Math.min(worldSize - 100, y));
+            const hpScale = 1 + gameTime * 0.05;
+            bosses.push({ x, y, hp: type.hp * hpScale, maxHp: type.hp * hpScale, radius: type.radius, speed: type.speed, color: type.color, glow: type.glow, damage: type.damage, name: type.name, element: type.element, type: type.type, hitFlash: 0, wobble: Math.random() * 6.28, attackCooldown: 2, skillCooldown: 3 });
+            const alert = document.getElementById('disaster-alert'); alert.textContent = type.element + ' ' + type.name + ' MUNCUL!'; alert.style.color = type.glow; alert.style.display = 'block'; setTimeout(() => alert.style.display = 'none', 3000);
+        }
+        function triggerDisaster() {
+            const types = ['meteor','earthquake','blizzard','lightningstorm','tsunami'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const alert = document.getElementById('disaster-alert'); alert.style.display = 'block';
+            if (type === 'meteor') { alert.textContent = '☄️ HUJAN METEOR!'; alert.style.color = '#ff6600'; disasters.push({type:'meteor', timer:8, interval:0.5}); }
+            else if (type === 'earthquake') { alert.textContent = '🌋 GEMPA BUMI!'; alert.style.color = '#b8860b'; screenShake = 15; disasters.push({type:'earthquake', timer:6}); }
+            else if (type === 'blizzard') { alert.textContent = '❄️ BADAI SALJU!'; alert.style.color = '#add8e6'; disasters.push({type:'blizzard', timer:10}); }
+            else if (type === 'lightningstorm') { alert.textContent = '⚡ BADAI PETIR!'; alert.style.color = '#ffff00'; disasters.push({type:'lightningstorm', timer:8, interval:1}); }
+            else if (type === 'tsunami') { alert.textContent = '🌊 TSUNAMI DATANG!'; alert.style.color = '#00aaff'; const startX = player.x - 600; disasters.push({type:'tsunami', timer:12, waveX:startX, speed:150, width:400, damage:15, hitPlayer:false}); }
+            setTimeout(() => alert.style.display = 'none', 2000);
+        }
+        function spawnEnemy() {
+            if (!gameRunning || gamePaused) return;
+            const angle = Math.random() * Math.PI * 2, dist = 500 + Math.random() * 400;
+            let x = player.x + Math.cos(angle) * dist, y = player.y + Math.sin(angle) * dist;
+            x = Math.max(50, Math.min(worldSize - 50, x)); y = Math.max(50, Math.min(worldSize - 50, y));
+            const r = Math.random(); let ti = 0, c = 0;
+            for (let i = 0; i < enemyTypes.length; i++) { c += [0.45,0.25,0.18,0.12][i]; if (r < c) { ti = i; break; } }
+            const t = enemyTypes[ti];
+            const hpM = 1 + gameTime * 0.08;
+            const speedM = 1 + gameTime * 0.005;
+            const xpMultiplier = 1 + hpM * 0.5;
+            const baseXp = t.xpValue;
+            enemies.push({
+                x, y,
+                hp: t.hp * hpM,
+                maxHp: t.hp * hpM,
+                radius: t.radius * (1 + Math.min(gameTime * 0.01, 0.5)),
+                speed: t.speed * speedM,
+                color: t.color,
+                glow: t.glow,
+                score: t.score,
+                xpValue: Math.floor(baseXp * xpMultiplier),
+                damage: t.damage,
+                type: t.type,
+                hitFlash: 0,
+                wobble: Math.random() * 6.28,
+                slowed: 0,
+                slowTimer: 0,
+                poisoned: 0,
+                poisonTimer: 0
+            });
+        }
+        function fireProjectile() {
+            const target = findNearestEnemy(); if (!target) return;
+            const angle = Math.atan2(target.y - player.y, target.x - player.x);
+            const count = player.projectileCount;
+            for (let i = 0; i < count; i++) {
+                const off = (i - (count - 1) / 2) * 0.12, fa = angle + off;
+                projectiles.push({ x: player.x, y: player.y, vx: Math.cos(fa) * 520, vy: Math.sin(fa) * 520, damage: 10 * player.damageMult, pierce: player.pierce, hitEnemies: new Set(), radius: 5, color: '#00f0ff', glow: '#00aaff', life: 1.8 });
+            }
+            shootSnd();
+        }
+        function findNearestEnemy() {
+            let n = null, m = Infinity;
+            for (const e of enemies) { const d = (e.x - player.x) ** 2 + (e.y - player.y) ** 2; if (d < m) { m = d; n = e; } }
+            for (const b of bosses) { const d = (b.x - player.x) ** 2 + (b.y - player.y) ** 2; if (d < m) { m = d; n = b; } }
+            for (const fb of finalBosses) { const d = (fb.x - player.x) ** 2 + (fb.y - player.y) ** 2; if (d < m) { m = d; n = fb; } }
+            return n;
+        }
+        function spawnParticles(x, y, color, count, speed = 150, life = 0.6, size = 4) {
+            for (let i = 0; i < count; i++) {
+                const a = Math.random() * 6.28, sp = Math.random() * speed + speed * 0.3;
+                particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: Math.random() * life + life * 0.5, maxLife: life * 1.5, radius: Math.random() * size + 1, color, glow: true });
             }
         }
-        if (player.poisonAura) for (const e of enemies) if (Math.sqrt((e.x - player.x) ** 2 + (e.y - player.y) ** 2) < player.poisonAuraRadius) { e.poisoned = 2; e.poisonTimer = 0.5; }
-        if (player.laserOrbital) { player.laserCooldown -= dt; player.laserAngle += dt * 2.5; if (player.laserCooldown <= 0) { player.laserCooldown = 3; const target = findNearestEnemy(); if (target) { const orbX = player.x + Math.cos(player.laserAngle) * 80, orbY = player.y + Math.sin(player.laserAngle) * 80; const angle = Math.atan2(target.y - orbY, target.x - orbX); projectiles.push({ x: orbX, y: orbY, vx: Math.cos(angle) * 700, vy: Math.sin(angle) * 700, damage: 40 * player.damageMult, pierce: 5, hitEnemies: new Set(), radius: 14, color: '#ff0000', glow: '#ff4444', life: 1.5 }); } } }
-        if (player.droneCount > 0) { player.droneCooldown -= dt; if (player.droneCooldown <= 0) { player.droneCooldown = player.droneFireRate; const target = findNearestEnemy(); if (target) { for (let i = 0; i < player.droneCount; i++) { const angleOffset = i * 2 * Math.PI / player.droneCount; const dxp = player.x + Math.cos(angleOffset) * 70, dyp = player.y + Math.sin(angleOffset) * 70; const angle = Math.atan2(target.y - dyp, target.x - dxp); projectiles.push({ x: dxp, y: dyp, vx: Math.cos(angle) * 450, vy: Math.sin(angle) * 450, damage: 15 * player.damageMult, pierce: 0, hitEnemies: new Set(), radius: 4, color: '#00ff88', glow: '#00cc66', life: 1.2 }); } } } }
-        if (player.planeEnabled) { player.planeCooldown -= dt; if (player.planeCooldown <= 0) { player.planeCooldown = 8; const target = findNearestEnemy(); if (target) { spawnBomb(target.x, target.y, player.bombRadius); } } }
-        if (player.bombEnabled) { player.bombCooldown -= dt; if (player.bombCooldown <= 0) { player.bombCooldown = 6; const target = findNearestEnemy(); if (target) spawnBomb(target.x, target.y, player.bombRadius); } }
-        if (player.fireAura) for (const e of enemies) if (Math.sqrt((e.x - player.x) ** 2 + (e.y - player.y) ** 2) < 80) damageEnemy(e, player.fireAuraDamage * player.damageMult * dt);
-        for (let i = bombs.length - 1; i >= 0; i--) { bombs[i].timer -= dt; if (bombs[i].timer <= 0) { explodeBomb(bombs[i]); bombs.splice(i, 1); } }
-        enemySpawnTimer -= dt; if (enemySpawnTimer <= 0) { spawnEnemy(); enemySpawnTimer = Math.max(0.3, 1.0 - gameTime * 0.005); }
-        bossSpawnTimer -= dt; if (bossSpawnTimer <= 0) { spawnBoss(); bossSpawnTimer = 45; }
-        disasterTimer -= dt; if (disasterTimer <= 0) { triggerDisaster(); disasterTimer = 25 + Math.random() * 15; }
-        finalBossTimer -= dt; if (finalBossTimer <= 0) { spawnFinalBoss(); finalBossTimer = 300; }
-        for (let i = disasters.length - 1; i >= 0; i--) { const d = disasters[i]; d.timer -= dt; if (d.timer <= 0) { disasters.splice(i, 1); continue; }
-            if (d.type === 'meteor') { d.interval -= dt; if (d.interval <= 0) { d.interval = 0.5; const mx = player.x + (Math.random() - 0.5) * 800, my = player.y + (Math.random() - 0.5) * 800; spawnParticles(mx, my, '#ff6600', 20, 200, 0.5, 5); for (const e of enemies) if (Math.sqrt((e.x - mx) ** 2 + (e.y - my) ** 2) < 80) damageEnemy(e, 50); } }
-            else if (d.type === 'earthquake') screenShake = Math.max(screenShake, 12);
-            else if (d.type === 'blizzard') { player.slowTimer = 0.5; player.slowFactor = 0.98; if (Math.random() < 0.3) spawnParticles(player.x + (Math.random() - 0.5) * 600, player.y + (Math.random() - 0.5) * 600, '#add8e6', 5, 60, 0.6, 2); }
-            else if (d.type === 'lightningstorm') { d.interval -= dt; if (d.interval <= 0) { d.interval = 1; const lx = player.x + (Math.random() - 0.5) * 500, ly = player.y + (Math.random() - 0.5) * 500; spawnParticles(lx, ly, '#ffff00', 15, 150, 0.4, 4); } }
-            else if (d.type === 'tsunami') { d.waveX += d.speed * dt; if (d.waveX > worldSize + 500) { disasters.splice(i, 1); continue; } if (!d.hitPlayer && player.x > d.waveX && player.x < d.waveX + d.width) { damagePlayer(d.damage); d.hitPlayer = true; } }
+        function spawnXpOrb(x, y, value = 3) { xpOrbs.push({ x, y, value, radius: 6, attracted: false, vx: (Math.random() - 0.5) * 60, vy: (Math.random() - 0.5) * 60 }); }
+        function spawnDamageText(x, y, text, color = '#fff') { damageTexts.push({ x: x + (Math.random() - 0.5) * 20, y: y - 10, text, color, life: 0.8, maxLife: 0.8, vy: -60 }); }
+        function spawnLightningBolt(target) {
+            const pts = [], steps = 12;
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps, j = (Math.random() - 0.5) * 40 * (i < steps ? 1 : 0.3), px = -(target.y - player.y), py = (target.x - player.x), l = Math.sqrt(px * px + py * py) || 1;
+                pts.push({ x: player.x + (target.x - player.x) * t + (px / l) * j, y: player.y + (target.y - player.y) * t + (py / l) * j });
+            }
+            lightningBolts.push({ points: pts, life: 0.25, maxLife: 0.25, target });
+            const dmg = 30 * player.damageMult; if (target.hp !== undefined) damageEnemy(target, dmg, true);
+            spawnParticles(target.x, target.y, '#ffff00', 10, 120, 0.4, 3);
         }
-        for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; let sp = e.speed; if (e.slowed > 0) { sp *= 0.7; e.slowTimer -= dt; if (e.slowTimer <= 0) e.slowed = 0; } if (e.poisoned > 0) { e.poisonTimer -= dt; if (e.poisonTimer <= 0) { damageEnemy(e, player.poisonDamage); e.poisonTimer = 1; e.poisoned -= dt; } } const dxp = player.x - e.x, dyp = player.y - e.y, dist = Math.sqrt(dxp * dxp + dyp * dyp); if (dist > 0.5) { e.x += dxp / dist * sp * dt; e.y += dyp / dist * sp * dt; } if (dist < e.radius + player.radius) { damagePlayer(e.damage); if (player.thornsDamage > 0) damageEnemy(e, player.thornsDamage); } if (dist > 2500) enemies.splice(i, 1); }
-        for (let i = bosses.length - 1; i >= 0; i--) { const b = bosses[i]; const dxp = player.x - b.x, dyp = player.y - b.y, dist = Math.sqrt(dxp * dxp + dyp * dyp); if (dist > 0.5) { b.x += dxp / dist * b.speed * dt; b.y += dyp / dist * b.speed * dt; } b.attackCooldown -= dt; b.skillCooldown -= dt;
-            if (b.skillCooldown <= 0 && dist < 400) { b.skillCooldown = 3; if (b.type === 'water') { for (let j = 0; j < 12; j++) { const a = Math.atan2(player.y - b.y, player.x - b.x) + j * 0.35 - 2.0; projectiles.push({ x: b.x, y: b.y, vx: Math.cos(a) * 300, vy: Math.sin(a) * 300, damage: b.damage * 0.6, pierce: 0, hitEnemies: new Set(), radius: 10, color: '#00aaff', glow: '#00ccff', life: 1.5 }); } } else if (b.type === 'earth') { spawnParticles(b.x, b.y, '#b8860b', 40, 180, 0.6, 7); screenShake = Math.max(screenShake, 14); } else if (b.type === 'ice') { player.slowTimer = 3; player.slowFactor = 0.7; spawnParticles(b.x, b.y, '#add8e6', 40, 200, 0.6, 7); } else if (b.type === 'nature') { for (let j = 0; j < 4; j++) spawnEnemy(); } else if (b.type === 'lightning') { for (let j = 0; j < 8; j++) { const lx = b.x + (Math.random() - 0.5) * 350, ly = b.y + (Math.random() - 0.5) * 350; spawnParticles(lx, ly, '#ffff00', 20, 200, 0.4, 5); } } }
-            if (dist < b.radius + player.radius) damagePlayer(b.damage);
-            if (bosses.length > 0) { document.getElementById('boss-bar-container').style.display = 'block'; document.getElementById('boss-bar-fill').style.width = (b.hp / b.maxHp * 100) + '%'; document.getElementById('boss-name').textContent = b.element + ' ' + b.name; }
+        function spawnBomb(x, y, radius = 120) { bombs.push({ x, y, radius, timer: 1.5, maxTimer: 1.5 }); snd(800, 100, 0.3, 'square', 0.1); }
+        function explodeBomb(b) {
+            spawnParticles(b.x, b.y, '#ff4400', 40, 300, 0.8, 8); spawnParticles(b.x, b.y, '#ffaa00', 30, 200, 0.6, 6);
+            screenShake = Math.max(screenShake, 10);
+            for (const e of enemies) if (Math.sqrt((e.x - b.x) ** 2 + (e.y - b.y) ** 2) < b.radius) damageEnemy(e, 80 * player.damageMult);
+            for (const bo of bosses) if (Math.sqrt((bo.x - b.x) ** 2 + (bo.y - b.y) ** 2) < b.radius) damageEnemy(bo, 100 * player.damageMult);
+            for (const fb of finalBosses) if (Math.sqrt((fb.x - b.x) ** 2 + (fb.y - b.y) ** 2) < b.radius) damageEnemy(fb, 100 * player.damageMult);
+            bombSnd();
         }
-        if (bosses.length === 0) document.getElementById('boss-bar-container').style.display = 'none';
-        for (let i = finalBosses.length - 1; i >= 0; i--) { const fb = finalBosses[i]; const dxp = player.x - fb.x, dyp = player.y - fb.y, dist = Math.sqrt(dxp * dxp + dyp * dyp); if (dist > 0.5) { fb.x += dxp / dist * fb.speed * dt; fb.y += dyp / dist * fb.speed * dt; } if (dist < fb.radius + player.radius) damagePlayer(fb.damage); if (finalBosses.length > 0) { document.getElementById('final-boss-bar-container').style.display = 'block'; document.getElementById('final-boss-bar-fill').style.width = (fb.hp / fb.maxHp * 100) + '%'; document.getElementById('final-boss-name').textContent = fb.name; } }
-        if (finalBosses.length === 0) document.getElementById('final-boss-bar-container').style.display = 'none';
-        for (let i = projectiles.length - 1; i >= 0; i--) { const p = projectiles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; let rem = p.life <= 0; if (!rem) { for (const e of enemies) { if (p.hitEnemies.has(e)) continue; if (Math.sqrt((e.x - p.x) ** 2 + (e.y - p.y) ** 2) < e.radius + p.radius) { const crit = Math.random() < player.critChance; damageEnemy(e, p.damage * (crit ? 2.5 : 1), crit); p.hitEnemies.add(e); if (p.pierce > 0) { p.pierce--; p.hitEnemies.delete(e); } else { rem = true; break; } } } if (!rem) for (const b of bosses) { if (p.hitEnemies.has(b)) continue; if (Math.sqrt((b.x - p.x) ** 2 + (b.y - p.y) ** 2) < b.radius + p.radius) { damageEnemy(b, p.damage); p.hitEnemies.add(b); rem = true; break; } } if (!rem) for (const fb of finalBosses) { if (p.hitEnemies.has(fb)) continue; if (Math.sqrt((fb.x - p.x) ** 2 + (fb.y - p.y) ** 2) < fb.radius + p.radius) { damageEnemy(fb, p.damage); p.hitEnemies.add(fb); rem = true; break; } } }
-        if (rem) projectiles.splice(i, 1); }
-        const mr = player.baseMagnet * player.magnetMult; for (let i = xpOrbs.length - 1; i >= 0; i--) { const o = xpOrbs[i], dxp = player.x - o.x, dyp = player.y - o.y, dist = Math.sqrt(dxp * dxp + dyp * dyp); if (dist < mr) { const pull = 600 * dt; o.x += dxp / dist * pull; o.y += dyp / dist * pull; } else { o.x += o.vx * dt; o.y += o.vy * dt; } if (dist < player.radius + o.radius + 6) { gainXP(o.value); xpOrbs.splice(i, 1); } }
-        for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; if (p.life <= 0) particles.splice(i, 1); }
-        for (let i = damageTexts.length - 1; i >= 0; i--) { damageTexts[i].y += damageTexts[i].vy * dt; damageTexts[i].life -= dt; if (damageTexts[i].life <= 0) damageTexts.splice(i, 1); }
-        for (let i = lightningBolts.length - 1; i >= 0; i--) { lightningBolts[i].life -= dt; if (lightningBolts[i].life <= 0) lightningBolts.splice(i, 1); }
-        if (screenShake > 0) screenShake *= Math.pow(0.02, dt); if (screenShake < 0.1) screenShake = 0;
-    }
+        function damageEnemy(e, d, crit = false) {
+            e.hp -= d; e.hitFlash = 0.15; spawnDamageText(e.x, e.y, Math.round(d), crit ? '#ffd700' : '#fff');
+            if (crit) spawnParticles(e.x, e.y, '#ffd700', 3, 80, 0.3, 3);
+            if (e.hp <= 0) killEnemy(e);
+        }
+        function killEnemy(e) {
+            const i = enemies.indexOf(e); if (i > -1) enemies.splice(i, 1);
+            const bi = bosses.indexOf(e);
+            if (bi > -1) {
+                bosses.splice(bi, 1); bossesKilled++; document.getElementById('go-bosses').textContent = bossesKilled;
+                document.getElementById('boss-bar-container').style.display = 'none';
+                spawnParticles(e.x, e.y, e.glow, 40, 300, 1, 8); spawnXpOrb(e.x, e.y, 150);
+                level += 3; xpToNext = Math.floor(10 * Math.pow(1.1, level - 1));
+                updateLevelUI(); updateXPUI();
+                pendingUpgrades += 3; showUpgradeScreen();
+            } else if (finalBosses.indexOf(e) > -1) {
+                const fi = finalBosses.indexOf(e); finalBosses.splice(fi, 1);
+                document.getElementById('final-boss-bar-container').style.display = 'none';
+                spawnParticles(e.x, e.y, e.glow, 80, 500, 1.5, 10); spawnXpOrb(e.x, e.y, 200);
+                level += 3; xpToNext = Math.floor(10 * Math.pow(1.1, level - 1));
+                updateLevelUI(); updateXPUI();
+                pendingUpgrades += 3; showUpgradeScreen();
+            } else {
+                kills += e.score; spawnParticles(e.x, e.y, e.glow, 18, 200, 0.7, 5); spawnXpOrb(e.x, e.y, e.xpValue || 1);
+                if (player.lifesteal > 0) { player.hp = Math.min(player.maxHp, player.hp + player.lifesteal); updateHealthUI(); }
+                if (player.xpSteal > 0) gainXP(player.xpSteal);
+                if (player.explosiveKills) { spawnParticles(e.x, e.y, '#ff4400', 20, 200, 0.4, 4); for (const en of enemies) if (en !== e && Math.sqrt((en.x - e.x) ** 2 + (en.y - e.y) ** 2) < player.explosionRadius) damageEnemy(en, 30); }
+            }
+            expSnd(); updateKillUI();
+        }
+        function damagePlayer(a) {
+            if (player.invincible > 0) return;
+            if (player.energyShield && player.shieldCooldown <= 0) { player.shieldCooldown = 5; return; }
+            if (player.reflectShield) for (const en of enemies) if (Math.sqrt((en.x - player.x) ** 2 + (en.y - player.y) ** 2) < 100) damageEnemy(en, a * player.reflectPercent);
+            a *= player.damageReduction || 1; player.hp -= a; player.invincible = 0.3; screenShake = Math.max(screenShake, 6);
+            spawnParticles(player.x, player.y, '#ff3b6b', 12, 180, 0.5, 4);
+            if (player.hp <= 0) { player.hp = 0; gameOver(); }
+            updateHealthUI();
+        }
+        function updateHealthUI() { const p = Math.max(0, (player.hp / player.maxHp) * 100); document.getElementById('health-bar-fill').style.width = p + '%'; document.getElementById('health-text').textContent = Math.ceil(player.hp) + ' / ' + player.maxHp; }
+        function updateXPUI() { const p = Math.min(100, (xp / xpToNext) * 100); document.getElementById('xp-bar-fill').style.width = p + '%'; document.getElementById('xp-text').textContent = 'XP: ' + Math.floor(xp) + ' / ' + xpToNext; }
+        function updateKillUI() { document.getElementById('kill-num').textContent = kills; }
+        function updateLevelUI() { document.getElementById('level-num').textContent = level; }
+        function updateTimerUI() { const m = Math.floor(gameTime / 60), s = Math.floor(gameTime % 60); document.getElementById('time-min').textContent = String(m).padStart(2, '0'); document.getElementById('time-sec').textContent = String(s).padStart(2, '0'); }
+        function updateBestRecordUI() { document.getElementById('best-time').textContent = String(Math.floor(bestTime / 60)).padStart(2, '0') + ':' + String(bestTime % 60).padStart(2, '0'); document.getElementById('best-kills').textContent = bestKills; }
+        function gainXP(a) {
+            a *= player.xpGainMult || 1; xp += a;
+            while (xp >= xpToNext) { xp -= xpToNext; level++; xpToNext = Math.floor(10 * Math.pow(1.1, level - 1)); updateLevelUI(); updateXPUI(); showUpgradeScreen(); levelSnd(); }
+            updateXPUI();
+        }
+        function evolveSkill(upgId, tier) {
+            switch (upgId) {
+                case 'dmg': player.damageMult *= 1 + 0.5 * (tier/10); break;
+                case 'firerate': player.fireRateMult *= 1 + 0.3 * (tier/10); break;
+                case 'speed': player.baseSpeedMult *= 1 + 0.25 * (tier/10); break;
+                case 'maxhp': player.maxHp += 50 * (tier/10); player.hp += 50 * (tier/10); break;
+                case 'multishot': player.projectileCount += 1 * (tier/10); break;
+                case 'pierce': player.pierce += 1 * (tier/10); break;
+                case 'throwing_knife': player.throwingKnives += 2 * (tier/10); break;
+                case 'lightning': player.lightningCooldown = Math.max(0.5, player.lightningCooldown - 0.5 * (tier/10)); break;
+                case 'crit': player.critChance = Math.min(0.9, player.critChance + 0.05 * (tier/10)); break;
+                case 'regen': player.hpRegen += 2 * (tier/10); break;
+                case 'magnet': player.magnetMult *= 1 + 0.4 * (tier/10); break;
+                case 'fire_aura': player.fireAuraDamage += 10 * (tier/10); break;
+                case 'poison_touch': player.poisonDamage += 15 * (tier/10); break;
+                case 'thorns': player.thornsDamage += 10 * (tier/10); break;
+                case 'vampiric': player.lifesteal += 10 * (tier/10); break;
+                case 'shield': player.shieldCooldown = Math.max(1, player.shieldCooldown - 1 * (tier/10)); break;
+                case 'laser_orbital': player.laserCooldown = Math.max(0.5, player.laserCooldown - 0.5 * (tier/10)); break;
+                case 'drone': player.droneCount += 1 * (tier/10); break;
+                case 'plane': player.planeCooldown = Math.max(2, player.planeCooldown - 1 * (tier/10)); break;
+                case 'bomb': player.bombRadius += 50 * (tier/10); break;
+                case 'tornado': player.tornadoRadius += 50 * (tier/10); player.tornadoDamage += 20 * (tier/10); player.tornadoPull += 50 * (tier/10); break;
+                case 'chain_lightning': player.chainCount += 1 * (tier/10); break;
+                case 'poison_aura': player.poisonAuraRadius += 50 * (tier/10); break;
+                case 'reflect_shield': player.reflectPercent += 0.1 * (tier/10); break;
+                case 'xp_steal': player.xpSteal += 2 * (tier/10); break;
+                case 'attack_speed': player.fireRateMult *= 1 + 0.25 * (tier/10); break;
+                case 'explosive_kills': player.explosionRadius += 30 * (tier/10); break;
+                case 'transcendent_sword': player.transcendentSwordRadius += 100 * (tier/10); player.transcendentSwordDamage += 100 * (tier/10); break;
+                default: break;
+            }
+            const alert = document.getElementById('disaster-alert');
+            alert.textContent = `✨ EVOLUSI ${upgId.toUpperCase()} TIER ${tier}! ✨`;
+            alert.style.color = '#ffd700';
+            alert.style.display = 'block';
+            setTimeout(() => alert.style.display = 'none', 3000);
+            evoSnd();
+        }
+        function showUpgradeScreen() {
+            gamePaused = true;
+            const overlay = document.getElementById('upgrade-overlay'), panel = document.getElementById('upgrade-panel');
+            panel.innerHTML = '';
+            const isMs = milestoneLevels.includes(level);
+            getRandomUpgrades(level).forEach(upg => {
+                const card = document.createElement('div'); card.className = 'upgrade-card';
+                if (isMs) card.classList.add('milestone-card');
+                if (isMs) { const badge = document.createElement('span'); badge.className = 'milestone-badge'; badge.textContent = 'MILESTONE'; card.appendChild(badge); }
+                card.innerHTML = `<span class="rarity rarity-${upg.rarity}">${upg.rarity}</span><div class="icon">${upg.icon}</div><h3>${upg.name}</h3><p>${upg.desc}</p>`;
+                const count = player.upgradeCounts[upg.id] || 0;
+                if (count > 0) {
+                    const badge = document.createElement('span'); badge.className = 'upgrade-count-badge'; badge.textContent = count + 'x'; card.appendChild(badge);
+                }
+                const tier = Math.floor(count / 10);
+                if (tier > 0) {
+                    card.classList.add('tier-' + Math.min(tier, 10));
+                    const tierBadge = document.createElement('span'); tierBadge.className = 'tier-badge'; tierBadge.textContent = 'TIER ' + tier; card.appendChild(tierBadge);
+                }
+                card.addEventListener('click', () => {
+                    upg.apply();
+                    player.upgradeCounts[upg.id] = (player.upgradeCounts[upg.id] || 0) + 1;
+                    const newCount = player.upgradeCounts[upg.id];
+                    if (newCount % 10 === 0) evolveSkill(upg.id, newCount);
+                    overlay.classList.remove('active'); gamePaused = false;
+                    if (upg.id === 'maxhp' || upg.id === 'heal') updateHealthUI();
+                    if (pendingUpgrades > 0) { pendingUpgrades--; showUpgradeScreen(); }
+                });
+                card.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    upg.apply();
+                    player.upgradeCounts[upg.id] = (player.upgradeCounts[upg.id] || 0) + 1;
+                    const newCount = player.upgradeCounts[upg.id];
+                    if (newCount % 10 === 0) evolveSkill(upg.id, newCount);
+                    overlay.classList.remove('active'); gamePaused = false;
+                    if (upg.id === 'maxhp' || upg.id === 'heal') updateHealthUI();
+                    if (pendingUpgrades > 0) { pendingUpgrades--; showUpgradeScreen(); }
+                });
+                panel.appendChild(card);
+            });
+            overlay.classList.add('active');
+        }
+        function gameOver() {
+            gameRunning = false; gamePaused = false;
+            document.getElementById('game-over-overlay').classList.add('active');
+            document.getElementById('go-time').textContent = String(Math.floor(gameTime / 60)).padStart(2, '0') + ':' + String(Math.floor(gameTime % 60)).padStart(2, '0');
+            document.getElementById('go-kills').textContent = kills; document.getElementById('go-level').textContent = level;
+            if (kills > bestKills) { bestKills = kills; localStorage.setItem('survivor_best_kills', bestKills); }
+            if (Math.floor(gameTime) > bestTime) { bestTime = Math.floor(gameTime); localStorage.setItem('survivor_best_time', bestTime); }
+            updateBestRecordUI();
+        }
 
-    function render() {
-        ctx.clearRect(0, 0, W, H);
-        const cx = player.x - W / 2, cy = player.y - H / 2, sx = (Math.random() - 0.5) * screenShake * 2, sy = (Math.random() - 0.5) * screenShake * 2;
-        ctx.save(); ctx.translate(-cx + sx, -cy + sy);
-        ctx.fillStyle = '#0a0a12'; ctx.fillRect(cx - 50, cy - 50, W + 100, H + 100);
-        const gs = 100, stx = Math.floor(cx / gs) * gs, sty = Math.floor(cy / gs) * gs; ctx.strokeStyle = 'rgba(40,50,80,0.35)'; ctx.lineWidth = 1;
-        for (let x = stx; x < cx + W + gs; x += gs) { ctx.beginPath(); ctx.moveTo(x, cy - 20); ctx.lineTo(x, cy + H + 20); ctx.stroke(); }
-        for (let y = sty; y < cy + H + gs; y += gs) { ctx.beginPath(); ctx.moveTo(cx - 20, y); ctx.lineTo(cx + W + 20, y); ctx.stroke(); }
-        for (const s of backgroundStars) { s.twinkle += 0.03; ctx.fillStyle = `rgba(200,220,255,${s.a * (0.6 + 0.4 * Math.sin(s.twinkle))})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.28); ctx.fill(); }
-        for (const d of disasters) if (d.type === 'tsunami') { const grad = ctx.createLinearGradient(d.waveX, 0, d.waveX + d.width, 0); grad.addColorStop(0, 'rgba(0,100,255,0.8)'); grad.addColorStop(1, 'rgba(0,50,200,0.4)'); ctx.fillStyle = grad; ctx.fillRect(d.waveX, 0, d.width, worldSize); ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(d.waveX, 0, 15, worldSize); ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillRect(d.waveX + 15, 0, 10, worldSize); ctx.fillStyle = 'rgba(0,50,200,0.6)'; ctx.fillRect(d.waveX + d.width - 20, 0, 20, worldSize); }
-        if (player.tornadoActive) { const tx = player.tornadoX, ty = player.tornadoY; const grad = ctx.createRadialGradient(tx, ty, 0, tx, ty, player.tornadoRadius); grad.addColorStop(0, 'rgba(200,200,200,0.1)'); grad.addColorStop(0.5, 'rgba(255,255,255,0.25)'); grad.addColorStop(1, 'rgba(200,200,200,0)'); ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(tx, ty, player.tornadoRadius, 0, 6.28); ctx.fill(); for (let i = 0; i < 3; i++) { ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2; ctx.beginPath(); for (let a = 0; a < Math.PI * 2; a += 0.1) { const r = player.tornadoRadius * (0.3 + 0.2 * Math.sin(a * 3 + gameTime * 5 + i)); const x = tx + Math.cos(a + gameTime * 2 + i) * r; const y = ty + Math.sin(a + gameTime * 2 + i) * r; if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.stroke(); } }
-        // Transcendent Sword Visual
-        if (player.transcendentSwordActive) {
-            const sx = player.transcendentSwordX, sy = player.transcendentSwordY;
-            const timeRatio = player.transcendentSwordTimer / 1;
-            const offsetY = (1 - timeRatio) * 200;
-            ctx.fillStyle = player.transcendentSwordEvolved ? '#ffffff' : '#ffd700';
-            ctx.shadowColor = player.transcendentSwordEvolved ? '#00ffff' : '#ff00ff';
-            ctx.shadowBlur = 40;
-            ctx.beginPath();
-            ctx.moveTo(sx - 20, sy - 200 + offsetY);
-            ctx.lineTo(sx + 20, sy - 200 + offsetY);
-            ctx.lineTo(sx + 10, sy - 100 + offsetY);
-            ctx.lineTo(sx, sy - 20 + offsetY);
-            ctx.lineTo(sx - 10, sy - 100 + offsetY);
-            ctx.closePath();
-            ctx.fill();
+        function togglePause() {
+            if (!gameRunning) return;
+            gamePaused = !gamePaused;
+            document.getElementById('pause-btn').textContent = gamePaused ? '▶️' : '⏸️';
+        }
+
+        const keys = {}; addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (e.key === 'ArrowUp') keys['w'] = true; if (e.key === 'ArrowDown') keys['s'] = true; if (e.key === 'ArrowLeft') keys['a'] = true; if (e.key === 'ArrowRight') keys['d'] = true; });
+        addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; if (e.key === 'ArrowUp') keys['w'] = false; if (e.key === 'ArrowDown') keys['s'] = false; if (e.key === 'ArrowLeft') keys['a'] = false; if (e.key === 'ArrowRight') keys['d'] = false; });
+        let touchX = null, touchY = null; canvas.addEventListener('touchstart', e => { e.preventDefault(); const t = e.touches[0]; touchX = t.clientX; touchY = t.clientY; });
+        canvas.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; touchX = t.clientX; touchY = t.clientY; }); canvas.addEventListener('touchend', () => { touchX = null; touchY = null; });
+        let mDown = false; canvas.addEventListener('mousedown', e => { mDown = true; mouseX = e.clientX; mouseY = e.clientY; touchX = e.clientX; touchY = e.clientY; });
+        canvas.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; if (mDown) { touchX = e.clientX; touchY = e.clientY; } }); canvas.addEventListener('mouseup', () => { mDown = false; touchX = null; touchY = null; });
+
+        window.startGame = function () {
+            initAudio(); document.getElementById('start-overlay').classList.add('hidden');
+            gameRunning = true; gamePaused = false; gameTime = 0; kills = 0; level = 1; xp = 0; xpToNext = 20; bossesKilled = 0; pendingUpgrades = 0;
+            resetPlayer(); enemies = []; projectiles = []; particles = []; xpOrbs = []; damageTexts = []; lightningBolts = []; bosses = []; finalBosses = []; disasters = []; areaEffects = []; bombs = []; screenShake = 0;
+            updateHealthUI(); updateXPUI(); updateKillUI(); updateLevelUI(); updateTimerUI(); updateBestRecordUI();
+            document.getElementById('go-bosses').textContent = '0'; document.getElementById('game-over-overlay').classList.remove('active'); document.getElementById('upgrade-overlay').classList.remove('active');
+            document.getElementById('boss-bar-container').style.display = 'none'; document.getElementById('final-boss-bar-container').style.display = 'none';
+            document.getElementById('pause-btn').textContent = '⏸️';
+        };
+        window.restartGame = () => window.startGame();
+
+        let enemySpawnTimer = 0, bossSpawnTimer = 45, disasterTimer = 30, finalBossTimer = 300;
+
+        function update(dt) {
+            if (!gameRunning || gamePaused) return;
+            gameTime += dt; updateTimerUI(); if (player.shieldCooldown > 0) player.shieldCooldown -= dt;
+            if (player.slowTimer > 0) { player.slowTimer -= dt; if (player.slowTimer <= 0) player.slowFactor = 1; }
+            player.speedMult = player.baseSpeedMult * player.slowFactor;
+            if (player.hpRegen > 0) { player.hp = Math.min(player.maxHp, player.hp + player.hpRegen * dt); updateHealthUI(); }
+            if (player.invincible > 0) player.invincible -= dt;
+            let dx = 0, dy = 0; if (keys['w']) dy = -1; if (keys['s']) dy = 1; if (keys['a']) dx = -1; if (keys['d']) dx = 1;
+            if (touchX !== null && touchY !== null) { const cx = touchX - W / 2, cy = touchY - H / 2, l = Math.sqrt(cx * cx + cy * cy); if (l > 30) { dx = cx / l; dy = cy / l; } }
+            if (dx !== 0 || dy !== 0) { const l = Math.sqrt(dx * dx + dy * dy); player.x += dx / l * player.baseSpeed * player.speedMult * dt; player.y += dy / l * player.baseSpeed * player.speedMult * dt; }
+            player.x = Math.max(player.radius, Math.min(worldSize - player.radius, player.x)); player.y = Math.max(player.radius, Math.min(worldSize - player.radius, player.y));
+            const efr = player.baseFireRate * player.fireRateMult; player.fireCooldown -= dt; if (player.fireCooldown <= 0 && (enemies.length > 0 || bosses.length > 0 || finalBosses.length > 0)) { fireProjectile(); player.fireCooldown = 1 / efr; }
+            if (player.lightningEnabled) { player.lightningCooldown -= dt; if (player.lightningCooldown <= 0) { const targets = enemies.length > 0 ? enemies : bosses.length > 0 ? bosses : finalBosses; if (targets.length > 0) { const t = targets[Math.floor(Math.random() * targets.length)]; spawnLightningBolt(t); if (player.chainLightning) { let extra = player.chainCount; for (const e of enemies) if (e !== t && extra > 0 && Math.abs(e.x - t.x) < 200) { spawnLightningBolt(e); extra--; } } } player.lightningCooldown = Math.max(1, player.lightningCooldown); } }
+            if (player.throwingKnives > 0) { player.throwingKnifeCooldown -= dt; if (player.throwingKnifeCooldown <= 0) { player.throwingKnifeCooldown = 1; const target = findNearestEnemy(); if (target) { const angle = Math.atan2(target.y - player.y, target.x - player.x); for (let i = 0; i < player.throwingKnives; i++) { const spread = (i - (player.throwingKnives - 1) / 2) * 0.2, fa = angle + spread; projectiles.push({ x: player.x, y: player.y, vx: Math.cos(fa) * 600, vy: Math.sin(fa) * 600, damage: 25 * player.damageMult, pierce: 0, hitEnemies: new Set(), radius: 7, color: '#c86bff', glow: '#c86bff', life: 1.5, type: 'knife' }); } spawnParticles(player.x, player.y, '#c86bff', 5, 80, 0.2, 2); } } }
+            // Tornado
+            if (player.tornadoEnabled) {
+                if (!player.tornadoActive) { player.tornadoCooldown -= dt; if (player.tornadoCooldown <= 0) { player.tornadoActive = true; player.tornadoTimer = player.tornadoDuration; player.tornadoX = player.x; player.tornadoY = player.y; player.tornadoCooldown = 15; tornadoSnd(); } }
+                else { player.tornadoTimer -= dt; if (player.tornadoTimer <= 0) player.tornadoActive = false; else { for (const e of enemies) { const dx = e.x - player.tornadoX, dy = e.y - player.tornadoY, dist = Math.sqrt(dx * dx + dy * dy); if (dist < player.tornadoRadius) { damageEnemy(e, player.tornadoDamage * dt); if (dist > 5) { const pull = player.tornadoPull * dt * (1 - dist / player.tornadoRadius); e.x -= (dx / dist) * pull; e.y -= (dy / dist) * pull; } } } } }
+            }
+            // Transcendent Sword
+            if (player.transcendentSword) {
+                if (!player.transcendentSwordActive) {
+                    player.transcendentCooldown -= dt;
+                    if (player.transcendentCooldown <= 0) {
+                        player.transcendentSwordActive = true;
+                        player.transcendentSwordTimer = 1;
+                        const target = findNearestEnemy();
+                        if (target) { player.transcendentSwordX = target.x; player.transcendentSwordY = target.y; }
+                        else { player.transcendentSwordX = player.x; player.transcendentSwordY = player.y; }
+                        player.transcendentCooldown = 15;
+                        transcendentSnd();
+                    }
+                } else {
+                    player.transcendentSwordTimer -= dt;
+                    if (player.transcendentSwordTimer <= 0) {
+                        player.transcendentSwordActive = false;
+                        const sx = player.transcendentSwordX, sy = player.transcendentSwordY;
+                        const radius = player.transcendentSwordRadius;
+                        const damage = player.transcendentSwordDamage * player.damageMult;
+                        for (const e of enemies) if (Math.sqrt((e.x - sx) ** 2 + (e.y - sy) ** 2) < radius) damageEnemy(e, damage);
+                        for (const b of bosses) if (Math.sqrt((b.x - sx) ** 2 + (b.y - sy) ** 2) < radius) damageEnemy(b, damage * 0.7);
+                        for (const fb of finalBosses) if (Math.sqrt((fb.x - sx) ** 2 + (fb.y - sy) ** 2) < radius) damageEnemy(fb, damage * 0.7);
+                        spawnParticles(sx, sy, '#ffd700', 50, 300, 0.8, 8);
+                        screenShake = Math.max(screenShake, 15);
+                    }
+                }
+            }
+            if (player.poisonAura) for (const e of enemies) if (Math.sqrt((e.x - player.x) ** 2 + (e.y - player.y) ** 2) < player.poisonAuraRadius) { e.poisoned = 2; e.poisonTimer = 0.5; }
+            if (player.laserOrbital) { player.laserCooldown -= dt; player.laserAngle += dt * 2.5; if (player.laserCooldown <= 0) { player.laserCooldown = 3; const target = findNearestEnemy(); if (target) { const orbX = player.x + Math.cos(player.laserAngle) * 80, orbY = player.y + Math.sin(player.laserAngle) * 80; const angle = Math.atan2(target.y - orbY, target.x - orbX); projectiles.push({ x: orbX, y: orbY, vx: Math.cos(angle) * 700, vy: Math.sin(angle) * 700, damage: 40 * player.damageMult, pierce: 5, hitEnemies: new Set(), radius: 14, color: '#ff0000', glow: '#ff4444', life: 1.5 }); } } }
+            if (player.droneCount > 0) { player.droneCooldown -= dt; if (player.droneCooldown <= 0) { player.droneCooldown = player.droneFireRate; const target = findNearestEnemy(); if (target) { for (let i = 0; i < player.droneCount; i++) { const angleOffset = i * 2 * Math.PI / player.droneCount; const dxp = player.x + Math.cos(angleOffset) * 70, dyp = player.y + Math.sin(angleOffset) * 70; const angle = Math.atan2(target.y - dyp, target.x - dxp); projectiles.push({ x: dxp, y: dyp, vx: Math.cos(angle) * 450, vy: Math.sin(angle) * 450, damage: 15 * player.damageMult, pierce: 0, hitEnemies: new Set(), radius: 4, color: '#00ff88', glow: '#00cc66', life: 1.2 }); } } } }
+            if (player.planeEnabled) { player.planeCooldown -= dt; if (player.planeCooldown <= 0) { player.planeCooldown = 8; const target = findNearestEnemy(); if (target) { spawnBomb(target.x, target.y, player.bombRadius); } } }
+            if (player.bombEnabled) { player.bombCooldown -= dt; if (player.bombCooldown <= 0) { player.bombCooldown = 6; const target = findNearestEnemy(); if (target) spawnBomb(target.x, target.y, player.bombRadius); } }
+            if (player.fireAura) for (const e of enemies) if (Math.sqrt((e.x - player.x) ** 2 + (e.y - player.y) ** 2) < 80) damageEnemy(e, player.fireAuraDamage * player.damageMult * dt);
+            for (let i = bombs.length - 1; i >= 0; i--) { bombs[i].timer -= dt; if (bombs[i].timer <= 0) { explodeBomb(bombs[i]); bombs.splice(i, 1); } }
+            enemySpawnTimer -= dt; if (enemySpawnTimer <= 0) { spawnEnemy(); enemySpawnTimer = Math.max(0.3, 1.0 - gameTime * 0.005); }
+            bossSpawnTimer -= dt; if (bossSpawnTimer <= 0) { spawnBoss(); bossSpawnTimer = 45; }
+            disasterTimer -= dt; if (disasterTimer <= 0) { triggerDisaster(); disasterTimer = 25 + Math.random() * 15; }
+            finalBossTimer -= dt; if (finalBossTimer <= 0) { spawnFinalBoss(); finalBossTimer = 300; }
+            for (let i = disasters.length - 1; i >= 0; i--) { const d = disasters[i]; d.timer -= dt; if (d.timer <= 0) { disasters.splice(i, 1); continue; }
+                if (d.type === 'meteor') { d.interval -= dt; if (d.interval <= 0) { d.interval = 0.5; const mx = player.x + (Math.random() - 0.5) * 800, my = player.y + (Math.random() - 0.5) * 800; spawnParticles(mx, my, '#ff6600', 20, 200, 0.5, 5); for (const e of enemies) if (Math.sqrt((e.x - mx) ** 2 + (e.y - my) ** 2) < 80) damageEnemy(e, 50); } }
+                else if (d.type === 'earthquake') screenShake = Math.max(screenShake, 12);
+                else if (d.type === 'blizzard') { player.slowTimer = 0.5; player.slowFactor = 0.98; if (Math.random() < 0.3) spawnParticles(player.x + (Math.random() - 0.5) * 600, player.y + (Math.random() - 0.5) * 600, '#add8e6', 5, 60, 0.6, 2); }
+                else if (d.type === 'lightningstorm') { d.interval -= dt; if (d.interval <= 0) { d.interval = 1; const lx = player.x + (Math.random() - 0.5) * 500, ly = player.y + (Math.random() - 0.5) * 500; spawnParticles(lx, ly, '#ffff00', 15, 150, 0.4, 4); } }
+                else if (d.type === 'tsunami') { d.waveX += d.speed * dt; if (d.waveX > worldSize + 500) { disasters.splice(i, 1); continue; } if (!d.hitPlayer && player.x > d.waveX && player.x < d.waveX + d.width) { damagePlayer(d.damage); d.hitPlayer = true; } }
+            }
+            for (let i = enemies.length - 1; i >= 0; i--) { const e = enemies[i]; let sp = e.speed; if (e.slowed > 0) { sp *= 0.7; e.slowTimer -= dt; if (e.slowTimer <= 0) e.slowed = 0; } if (e.poisoned > 0) { e.poisonTimer -= dt; if (e.poisonTimer <= 0) { damageEnemy(e, player.poisonDamage); e.poisonTimer = 1; e.poisoned -= dt; } } const dxp = player.x - e.x, dyp = player.y - e.y, dist = Math.sqrt(dxp * dxp + dyp * dyp); if (dist > 0.5) { e.x += dxp / dist * sp * dt; e.y += dyp / dist * sp * dt; } if (dist < e.radius + player.radius) { damagePlayer(e.damage); if (player.thornsDamage > 0) damageEnemy(e, player.thornsDamage); } if (dist > 2500) enemies.splice(i, 1); }
+            for (let i = bosses.length - 1; i >= 0; i--) { const b = bosses[i]; const dxp = player.x - b.x, dyp = player.y - b.y, dist = Math.sqrt(dxp * dxp + dyp * dyp); if (dist > 0.5) { b.x += dxp / dist * b.speed * dt; b.y += dyp / dist * b.speed * dt; } b.attackCooldown -= dt; b.skillCooldown -= dt;
+                if (b.skillCooldown <= 0 && dist < 400) { b.skillCooldown = 3; if (b.type === 'water') { for (let j = 0; j < 12; j++) { const a = Math.atan2(player.y - b.y, player.x - b.x) + j * 0.35 - 2.0; projectiles.push({ x: b.x, y: b.y, vx: Math.cos(a) * 300, vy: Math.sin(a) * 300, damage: b.damage * 0.6, pierce: 0, hitEnemies: new Set(), radius: 10, color: '#00aaff', glow: '#00ccff', life: 1.5 }); } } else if (b.type === 'earth') { spawnParticles(b.x, b.y, '#b8860b', 40, 180, 0.6, 7); screenShake = Math.max(screenShake, 14); } else if (b.type === 'ice') { player.slowTimer = 3; player.slowFactor = 0.7; spawnParticles(b.x, b.y, '#add8e6', 40, 200, 0.6, 7); } else if (b.type === 'nature') { for (let j = 0; j < 4; j++) spawnEnemy(); } else if (b.type === 'lightning') { for (let j = 0; j < 8; j++) { const lx = b.x + (Math.random() - 0.5) * 350, ly = b.y + (Math.random() - 0.5) * 350; spawnParticles(lx, ly, '#ffff00', 20, 200, 0.4, 5); } } }
+                if (dist < b.radius + player.radius) damagePlayer(b.damage);
+                if (bosses.length > 0) { document.getElementById('boss-bar-container').style.display = 'block'; document.getElementById('boss-bar-fill').style.width = (b.hp / b.maxHp * 100) + '%'; document.getElementById('boss-name').textContent = b.element + ' ' + b.name; }
+            }
+            if (bosses.length === 0) document.getElementById('boss-bar-container').style.display = 'none';
+            for (let i = finalBosses.length - 1; i >= 0; i--) { const fb = finalBosses[i]; const dxp = player.x - fb.x, dyp = player.y - fb.y, dist = Math.sqrt(dxp * dxp + dyp * dyp); if (dist > 0.5) { fb.x += dxp / dist * fb.speed * dt; fb.y += dyp / dist * fb.speed * dt; } if (dist < fb.radius + player.radius) damagePlayer(fb.damage); if (finalBosses.length > 0) { document.getElementById('final-boss-bar-container').style.display = 'block'; document.getElementById('final-boss-bar-fill').style.width = (fb.hp / fb.maxHp * 100) + '%'; document.getElementById('final-boss-name').textContent = fb.name; } }
+            if (finalBosses.length === 0) document.getElementById('final-boss-bar-container').style.display = 'none';
+            for (let i = projectiles.length - 1; i >= 0; i--) { const p = projectiles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; let rem = p.life <= 0; if (!rem) { for (const e of enemies) { if (p.hitEnemies.has(e)) continue; if (Math.sqrt((e.x - p.x) ** 2 + (e.y - p.y) ** 2) < e.radius + p.radius) { const crit = Math.random() < player.critChance; damageEnemy(e, p.damage * (crit ? 2.5 : 1), crit); p.hitEnemies.add(e); if (p.pierce > 0) { p.pierce--; p.hitEnemies.delete(e); } else { rem = true; break; } } } if (!rem) for (const b of bosses) { if (p.hitEnemies.has(b)) continue; if (Math.sqrt((b.x - p.x) ** 2 + (b.y - p.y) ** 2) < b.radius + p.radius) { damageEnemy(b, p.damage); p.hitEnemies.add(b); rem = true; break; } } if (!rem) for (const fb of finalBosses) { if (p.hitEnemies.has(fb)) continue; if (Math.sqrt((fb.x - p.x) ** 2 + (fb.y - p.y) ** 2) < fb.radius + p.radius) { damageEnemy(fb, p.damage); p.hitEnemies.add(fb); rem = true; break; } } }
+            if (rem) projectiles.splice(i, 1); }
+            const mr = player.baseMagnet * player.magnetMult; for (let i = xpOrbs.length - 1; i >= 0; i--) { const o = xpOrbs[i], dxp = player.x - o.x, dyp = player.y - o.y, dist = Math.sqrt(dxp * dxp + dyp * dyp); if (dist < mr) { const pull = 600 * dt; o.x += dxp / dist * pull; o.y += dyp / dist * pull; } else { o.x += o.vx * dt; o.y += o.vy * dt; } if (dist < player.radius + o.radius + 6) { gainXP(o.value); xpOrbs.splice(i, 1); } }
+            for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; if (p.life <= 0) particles.splice(i, 1); }
+            for (let i = damageTexts.length - 1; i >= 0; i--) { damageTexts[i].y += damageTexts[i].vy * dt; damageTexts[i].life -= dt; if (damageTexts[i].life <= 0) damageTexts.splice(i, 1); }
+            for (let i = lightningBolts.length - 1; i >= 0; i--) { lightningBolts[i].life -= dt; if (lightningBolts[i].life <= 0) lightningBolts.splice(i, 1); }
+            if (screenShake > 0) screenShake *= Math.pow(0.02, dt); if (screenShake < 0.1) screenShake = 0;
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, W, H);
+            const cx = player.x - W / 2, cy = player.y - H / 2, sx = (Math.random() - 0.5) * screenShake * 2, sy = (Math.random() - 0.5) * screenShake * 2;
+            ctx.save(); ctx.translate(-cx + sx, -cy + sy);
+            ctx.fillStyle = '#0a0a12'; ctx.fillRect(cx - 50, cy - 50, W + 100, H + 100);
+            const gs = 100, stx = Math.floor(cx / gs) * gs, sty = Math.floor(cy / gs) * gs; ctx.strokeStyle = 'rgba(40,50,80,0.35)'; ctx.lineWidth = 1;
+            for (let x = stx; x < cx + W + gs; x += gs) { ctx.beginPath(); ctx.moveTo(x, cy - 20); ctx.lineTo(x, cy + H + 20); ctx.stroke(); }
+            for (let y = sty; y < cy + H + gs; y += gs) { ctx.beginPath(); ctx.moveTo(cx - 20, y); ctx.lineTo(cx + W + 20, y); ctx.stroke(); }
+            for (const s of backgroundStars) { s.twinkle += 0.03; ctx.fillStyle = `rgba(200,220,255,${s.a * (0.6 + 0.4 * Math.sin(s.twinkle))})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.28); ctx.fill(); }
+            // Barrier world
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 15;
+            ctx.strokeRect(0, 0, worldSize, worldSize);
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(sx - 8, sy - 240 + offsetY, 16, 40);
-            ctx.strokeStyle = player.transcendentSwordEvolved ? 'rgba(0,255,255,0.9)' : 'rgba(255,215,0,0.8)';
-            ctx.lineWidth = 5;
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([20, 15]);
+            ctx.strokeRect(0, 0, worldSize, worldSize);
+            ctx.setLineDash([]);
+            for (const d of disasters) if (d.type === 'tsunami') { const grad = ctx.createLinearGradient(d.waveX, 0, d.waveX + d.width, 0); grad.addColorStop(0, 'rgba(0,100,255,0.8)'); grad.addColorStop(1, 'rgba(0,50,200,0.4)'); ctx.fillStyle = grad; ctx.fillRect(d.waveX, 0, d.width, worldSize); ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fillRect(d.waveX, 0, 15, worldSize); ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fillRect(d.waveX + 15, 0, 10, worldSize); ctx.fillStyle = 'rgba(0,50,200,0.6)'; ctx.fillRect(d.waveX + d.width - 20, 0, 20, worldSize); }
+            if (player.tornadoActive) { const tx = player.tornadoX, ty = player.tornadoY; const grad = ctx.createRadialGradient(tx, ty, 0, tx, ty, player.tornadoRadius); grad.addColorStop(0, 'rgba(200,200,200,0.1)'); grad.addColorStop(0.5, 'rgba(255,255,255,0.25)'); grad.addColorStop(1, 'rgba(200,200,200,0)'); ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(tx, ty, player.tornadoRadius, 0, 6.28); ctx.fill(); for (let i = 0; i < 3; i++) { ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2; ctx.beginPath(); for (let a = 0; a < Math.PI * 2; a += 0.1) { const r = player.tornadoRadius * (0.3 + 0.2 * Math.sin(a * 3 + gameTime * 5 + i)); const x = tx + Math.cos(a + gameTime * 2 + i) * r; const y = ty + Math.sin(a + gameTime * 2 + i) * r; if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.stroke(); } }
+            // Transcendent Sword Visual
+            if (player.transcendentSwordActive) {
+                const sx = player.transcendentSwordX, sy = player.transcendentSwordY;
+                const timeRatio = player.transcendentSwordTimer / 1;
+                const offsetY = (1 - timeRatio) * 200;
+                ctx.fillStyle = player.transcendentSwordEvolved ? '#ffffff' : '#ffd700';
+                ctx.shadowColor = player.transcendentSwordEvolved ? '#00ffff' : '#ff00ff';
+                ctx.shadowBlur = 40;
+                ctx.beginPath();
+                ctx.moveTo(sx - 20, sy - 200 + offsetY);
+                ctx.lineTo(sx + 20, sy - 200 + offsetY);
+                ctx.lineTo(sx + 10, sy - 100 + offsetY);
+                ctx.lineTo(sx, sy - 20 + offsetY);
+                ctx.lineTo(sx - 10, sy - 100 + offsetY);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(sx - 8, sy - 240 + offsetY, 16, 40);
+                ctx.strokeStyle = player.transcendentSwordEvolved ? 'rgba(0,255,255,0.9)' : 'rgba(255,215,0,0.8)';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.arc(sx, sy, player.transcendentSwordRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            for (const o of xpOrbs) { const g2 = 14 + Math.sin(gameTime * 5 + o.x) * 4; const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, g2); g.addColorStop(0, 'rgba(0,255,136,0.8)'); g.addColorStop(1, 'rgba(0,200,100,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(o.x, o.y, g2, 0, 6.28); ctx.fill(); ctx.fillStyle = '#00ff88'; ctx.beginPath(); ctx.arc(o.x, o.y, o.radius, 0, 6.28); ctx.fill(); }
+            for (const e of enemies) { ctx.fillStyle = e.hitFlash > 0 ? '#fff' : e.color; ctx.shadowColor = e.glow; ctx.shadowBlur = 18; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, 6.28); ctx.stroke(); }
+            for (const b of bosses) { ctx.fillStyle = b.hitFlash > 0 ? '#fff' : b.color; ctx.shadowColor = b.glow; ctx.shadowBlur = 30; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = b.glow; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius + 5, 0, 6.28); ctx.stroke(); ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(b.element, b.x, b.y - b.radius - 15); }
+            for (const fb of finalBosses) { ctx.fillStyle = fb.hitFlash > 0 ? '#fff' : fb.color; ctx.shadowColor = fb.glow; ctx.shadowBlur = 40; ctx.beginPath(); ctx.arc(fb.x, fb.y, fb.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = fb.glow; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(fb.x, fb.y, fb.radius + 8, 0, 6.28); ctx.stroke(); ctx.font = '32px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(fb.element, fb.x, fb.y - fb.radius - 20); }
+            for (const p of projectiles) { ctx.fillStyle = p.type === 'knife' ? '#c86bff' : '#fff'; ctx.shadowColor = p.glow; ctx.shadowBlur = 16; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; }
+            for (const b of bombs) { ctx.fillStyle = '#333'; ctx.shadowColor = '#ff6600'; ctx.shadowBlur = 15; ctx.beginPath(); ctx.arc(b.x, b.y, 12, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = '#ff0000'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('💣', b.x, b.y + 3); }
+            if (player.droneCount > 0) for (let i = 0; i < player.droneCount; i++) { const angleOffset = i * 2 * Math.PI / player.droneCount; const dxp = player.x + Math.cos(angleOffset) * 70, dyp = player.y + Math.sin(angleOffset) * 70; ctx.fillStyle = '#00ff88'; ctx.shadowColor = '#00ff88'; ctx.shadowBlur = 20; ctx.fillRect(dxp - 8, dyp - 6, 16, 12); ctx.fillStyle = '#fff'; ctx.fillRect(dxp - 4, dyp - 8, 8, 4); ctx.shadowBlur = 0; }
+            if (player.laserOrbital) { const ox = player.x + Math.cos(player.laserAngle) * 80, oy = player.y + Math.sin(player.laserAngle) * 80; ctx.fillStyle = '#ff2222'; ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 30; ctx.beginPath(); ctx.arc(ox, oy, 16, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; }
+            const pg = ctx.createRadialGradient(player.x, player.y, 0, player.x, player.y, player.radius * 3.5); pg.addColorStop(0, 'rgba(0,240,255,0.5)'); pg.addColorStop(1, 'rgba(0,240,255,0)'); ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(player.x, player.y, player.radius * 3.5, 0, 6.28); ctx.fill();
+            ctx.fillStyle = '#00e5ff'; ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 24; ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0;
+            for (const p of particles) { const a = p.life / p.maxLife; ctx.fillStyle = p.color + Math.floor(a * 180).toString(16).padStart(2, '0'); ctx.beginPath(); ctx.arc(p.x, p.y, p.radius * a, 0, 6.28); ctx.fill(); }
+            for (const d of damageTexts) { const a = d.life / d.maxLife; ctx.fillStyle = d.color + Math.floor(a * 255).toString(16).padStart(2, '0'); ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(d.text, d.x, d.y); }
+            ctx.restore();
+            // Mini map
+            const miniMapSize = 150;
+            const miniMapX = 20;
+            const miniMapY = H - miniMapSize - 20;
+            const scale = miniMapSize / worldSize;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(miniMapX, miniMapY, miniMapSize, miniMapSize);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(miniMapX, miniMapY, miniMapSize, miniMapSize);
+            ctx.fillStyle = '#00f0ff';
             ctx.beginPath();
-            ctx.arc(sx, sy, player.transcendentSwordRadius, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.arc(miniMapX + player.x * scale, miniMapY + player.y * scale, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ff3333';
+            for (const e of enemies) {
+                const mx = miniMapX + e.x * scale;
+                const my = miniMapY + e.y * scale;
+                if (mx > miniMapX && mx < miniMapX + miniMapSize && my > miniMapY && my < miniMapY + miniMapSize) {
+                    ctx.fillRect(mx - 1, my - 1, 2, 2);
+                }
+            }
+            ctx.fillStyle = '#ff00ff';
+            for (const b of bosses) {
+                const mx = miniMapX + b.x * scale;
+                const my = miniMapY + b.y * scale;
+                if (mx > miniMapX && mx < miniMapX + miniMapSize && my > miniMapY && my < miniMapY + miniMapSize) {
+                    ctx.beginPath();
+                    ctx.arc(mx, my, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            for (const fb of finalBosses) {
+                const mx = miniMapX + fb.x * scale;
+                const my = miniMapY + fb.y * scale;
+                if (mx > miniMapX && mx < miniMapX + miniMapSize && my > miniMapY && my < miniMapY + miniMapSize) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(mx, my, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.45)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
         }
-        for (const o of xpOrbs) { const g2 = 14 + Math.sin(gameTime * 5 + o.x) * 4; const g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, g2); g.addColorStop(0, 'rgba(0,255,136,0.8)'); g.addColorStop(1, 'rgba(0,200,100,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(o.x, o.y, g2, 0, 6.28); ctx.fill(); ctx.fillStyle = '#00ff88'; ctx.beginPath(); ctx.arc(o.x, o.y, o.radius, 0, 6.28); ctx.fill(); }
-        for (const e of enemies) { ctx.fillStyle = e.hitFlash > 0 ? '#fff' : e.color; ctx.shadowColor = e.glow; ctx.shadowBlur = 18; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, 6.28); ctx.stroke(); }
-        for (const b of bosses) { ctx.fillStyle = b.hitFlash > 0 ? '#fff' : b.color; ctx.shadowColor = b.glow; ctx.shadowBlur = 30; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = b.glow; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius + 5, 0, 6.28); ctx.stroke(); ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(b.element, b.x, b.y - b.radius - 15); }
-        for (const fb of finalBosses) { ctx.fillStyle = fb.hitFlash > 0 ? '#fff' : fb.color; ctx.shadowColor = fb.glow; ctx.shadowBlur = 40; ctx.beginPath(); ctx.arc(fb.x, fb.y, fb.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = fb.glow; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(fb.x, fb.y, fb.radius + 8, 0, 6.28); ctx.stroke(); ctx.font = '32px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(fb.element, fb.x, fb.y - fb.radius - 20); }
-        for (const p of projectiles) { ctx.fillStyle = p.type === 'knife' ? '#c86bff' : '#fff'; ctx.shadowColor = p.glow; ctx.shadowBlur = 16; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; }
-        for (const b of bombs) { ctx.fillStyle = '#333'; ctx.shadowColor = '#ff6600'; ctx.shadowBlur = 15; ctx.beginPath(); ctx.arc(b.x, b.y, 12, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = '#ff0000'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('💣', b.x, b.y + 3); }
-        if (player.droneCount > 0) for (let i = 0; i < player.droneCount; i++) { const angleOffset = i * 2 * Math.PI / player.droneCount; const dxp = player.x + Math.cos(angleOffset) * 70, dyp = player.y + Math.sin(angleOffset) * 70; ctx.fillStyle = '#00ff88'; ctx.shadowColor = '#00ff88'; ctx.shadowBlur = 20; ctx.fillRect(dxp - 8, dyp - 6, 16, 12); ctx.fillStyle = '#fff'; ctx.fillRect(dxp - 4, dyp - 8, 8, 4); ctx.shadowBlur = 0; }
-        if (player.laserOrbital) { const ox = player.x + Math.cos(player.laserAngle) * 80, oy = player.y + Math.sin(player.laserAngle) * 80; ctx.fillStyle = '#ff2222'; ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 30; ctx.beginPath(); ctx.arc(ox, oy, 16, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0; }
-        const pg = ctx.createRadialGradient(player.x, player.y, 0, player.x, player.y, player.radius * 3.5); pg.addColorStop(0, 'rgba(0,240,255,0.5)'); pg.addColorStop(1, 'rgba(0,240,255,0)'); ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(player.x, player.y, player.radius * 3.5, 0, 6.28); ctx.fill();
-        ctx.fillStyle = '#00e5ff'; ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 24; ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, 6.28); ctx.fill(); ctx.shadowBlur = 0;
-        for (const p of particles) { const a = p.life / p.maxLife; ctx.fillStyle = p.color + Math.floor(a * 180).toString(16).padStart(2, '0'); ctx.beginPath(); ctx.arc(p.x, p.y, p.radius * a, 0, 6.28); ctx.fill(); }
-        for (const d of damageTexts) { const a = d.life / d.maxLife; ctx.fillStyle = d.color + Math.floor(a * 255).toString(16).padStart(2, '0'); ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(d.text, d.x, d.y); }
-        ctx.restore();
-        const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.45)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
-    }
 
-    let lastTime = 0; function gameLoop(ts) { const dt = Math.min((ts - lastTime) / 1000, 0.05); lastTime = ts; if (gameRunning && !gamePaused) update(dt); render(); requestAnimationFrame(gameLoop); }
-    requestAnimationFrame(gameLoop);
-    updateHealthUI(); updateXPUI(); updateLevelUI(); updateTimerUI(); updateBestRecordUI();
-    console.log('✅ Game siap: Pedang Transenden (evolusi 3x radius 1 layar), pause, EXP dinamis');
+        let lastTime = 0; function gameLoop(ts) { const dt = Math.min((ts - lastTime) / 1000, 0.05); lastTime = ts; if (gameRunning && !gamePaused) update(dt); render(); requestAnimationFrame(gameLoop); }
+        requestAnimationFrame(gameLoop);
+        updateHealthUI(); updateXPUI(); updateLevelUI(); updateTimerUI(); updateBestRecordUI();
+        console.log('✅ Game siap: barrier world, minimap, evolusi UI tiap 10x, transcendent sword, pause');
     </script>
 </body>
 </html>
